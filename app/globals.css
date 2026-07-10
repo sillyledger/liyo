@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid theme("colors.leaf.DEFAULT");
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* warm ambient glow behind the shelf */
+  .hero-glow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(60% 55% at 82% 62%, rgba(94, 201, 122, 0.16), transparent 70%),
+      radial-gradient(45% 40% at 88% 40%, rgba(232, 180, 90, 0.07), transparent 70%);
+  }
+
+  /* the physical ledge each shelf row rests on */
+  .shelf-ledge {
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #332d20 0%, #1b180f 100%);
+    border-top: 1px solid rgba(243, 238, 225, 0.1);
+    box-shadow: 0 22px 26px -20px rgba(0, 0, 0, 0.9);
+    position: relative;
+    z-index: 1;
+  }
+  .shelf-ledge::after {
+    content: "";
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    top: -3px;
+    height: 3px;
+    background: radial-gradient(closest-side, rgba(94, 201, 122, 0.35), transparent);
+    filter: blur(1px);
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-settle {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .animate-eq {
+    animation: none !important;
+    transform: scaleY(0.6);
+  }
+}
