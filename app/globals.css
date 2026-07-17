@@ -2,9 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #EBE9E4;
+  --surface: #F6F4EF;
+  --surface-2: #EFEDE5;
+  --fg: #2B2539;
+  --muted: #6E6779;
+  --muted-2: #8B8598;
+  --line: rgba(43, 37, 57, 0.08);
+  --line-2: rgba(43, 37, 57, 0.14);
+  --accent: #7FA394;
+  --accent-fg: #F6F4EF;
+  --accent-hover: #6F927F;
+  --warm: #C98D8D;
+  --ledge-a: #A08D8D;
+  --ledge-b: #7B6767;
+  --shadow-color: rgba(43, 37, 57, 0.18);
+}
+
+/* Dark mode is wired up and ready to go — add class="dark" to <html> in
+   layout.tsx whenever we build the theme toggle. No component changes
+   will be needed; everything reads from these variables. */
+.dark {
+  --bg: #2B2539;
+  --surface: #342E44;
+  --surface-2: #3D3650;
+  --fg: #EBE9E4;
+  --muted: #A79FB5;
+  --muted-2: #847C93;
+  --line: rgba(235, 233, 228, 0.09);
+  --line-2: rgba(235, 233, 228, 0.16);
+  --accent: #BED3CC;
+  --accent-fg: #1D3A30;
+  --accent-hover: #D3E3DD;
+  --warm: #EFC8C8;
+  --ledge-a: #7B6767;
+  --ledge-b: #5A4A4A;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+}
+
 @layer base {
   :focus-visible {
-    outline: 2px solid theme("colors.leaf.DEFAULT");
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
     border-radius: 4px;
   }
@@ -19,18 +58,18 @@
     z-index: -1;
     pointer-events: none;
     background:
-      radial-gradient(60% 55% at 82% 62%, rgba(94, 201, 122, 0.16), transparent 70%),
-      radial-gradient(45% 40% at 88% 40%, rgba(232, 180, 90, 0.07), transparent 70%);
+      radial-gradient(60% 55% at 82% 62%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+      radial-gradient(45% 40% at 88% 40%, color-mix(in srgb, var(--warm) 12%, transparent), transparent 70%);
   }
 
-  /* the physical ledge each shelf row rests on */
+  /* the physical ledge each shelf row rests on — now a literal wood tone */
   .shelf-ledge {
     height: 12px;
     margin-top: -6px;
     border-radius: 3px;
-    background: linear-gradient(180deg, #332d20 0%, #1b180f 100%);
-    border-top: 1px solid rgba(243, 238, 225, 0.1);
-    box-shadow: 0 22px 26px -20px rgba(0, 0, 0, 0.9);
+    background: linear-gradient(180deg, var(--ledge-a) 0%, var(--ledge-b) 100%);
+    border-top: 1px solid var(--line-2);
+    box-shadow: 0 22px 26px -20px var(--shadow-color);
     position: relative;
     z-index: 1;
   }
@@ -41,7 +80,7 @@
     right: 4%;
     top: -3px;
     height: 3px;
-    background: radial-gradient(closest-side, rgba(94, 201, 122, 0.35), transparent);
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 35%, transparent), transparent);
     filter: blur(1px);
     opacity: 0.5;
   }
