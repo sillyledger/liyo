@@ -7,9 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 export function ClaimUsernameForm({ userId }: { userId: string }) {
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const [status, setStatus] = useState
-    "idle" | "checking" | "error" | "claiming"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "checking" | "error" | "claiming">("idle");
   const [error, setError] = useState<string | null>(null);
 
   function normalize(value: string) {
