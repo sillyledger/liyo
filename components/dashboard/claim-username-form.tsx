@@ -19,8 +19,8 @@ export function ClaimUsernameForm({ userId }: { userId: string }) {
     setError(null);
     const clean = normalize(username);
 
-    if (clean.length < 3) {
-      setError("Username needs to be at least 3 characters.");
+    if (clean.length < 2) {
+      setError("Username needs to be at least 2 characters.");
       return;
     }
 
@@ -55,11 +55,13 @@ export function ClaimUsernameForm({ userId }: { userId: string }) {
 
     if (profileError) {
       setStatus("error");
-      setError(
-        profileError.code === "23505"
-          ? "That username was just taken — try another."
-          : `Insert failed: ${profileError.message}`
-      );
+      if (profileError.code === "23505") {
+        setError("That username was just taken — try another.");
+      } else if (profileError.code === "23514") {
+        setError("That username isn't available.");
+      } else {
+        setError(`Insert failed: ${profileError.message}`);
+      }
       return;
     }
 
