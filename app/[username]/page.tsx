@@ -24,7 +24,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const supabase = createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, name, bio, avatar_url, sections")
+    .select("username, name, bio, location, website, avatar_url, sections")
     .eq("username", params.username)
     .maybeSingle();
 
@@ -63,6 +63,26 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <p className="mt-5 max-w-[34em] text-[14.5px] leading-[1.6] text-muted">
           {profile.bio}
         </p>
+      )}
+
+      {(profile.location || profile.website) && (
+        <div className="mt-3 flex flex-wrap gap-4 text-[13px] text-muted-2">
+          {profile.location && <span>{profile.location}</span>}
+          {profile.website && (
+            
+              href={
+                profile.website.startsWith("http")
+                  ? profile.website
+                  : `https://${profile.website}`
+              }
+              target="_blank"
+              rel="noreferrer"
+              className="text-sea-deep hover:underline"
+            >
+              {profile.website}
+            </a>
+          )}
+        </div>
       )}
 
       <div className="mt-8 w-full rounded-[16px] border border-line bg-surface px-6 py-10 text-center">
