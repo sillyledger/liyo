@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ClaimUsernameForm } from "@/components/dashboard/claim-username-form";
+import { ShelfEditor } from "@/components/dashboard/shelf-editor";
 
 export default async function DashboardHome() {
   const supabase = createClient();
@@ -14,16 +15,9 @@ export default async function DashboardHome() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username")
+    .select("username, name, bio, location, website, avatar_url, published_at")
     .eq("id", user.id)
     .maybeSingle();
-
-  async function signOut() {
-    "use server";
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    redirect("/login");
-  }
 
   if (!profile) {
     return (
@@ -33,28 +27,26 @@ export default async function DashboardHome() {
     );
   }
 
+  const { data: draft } = await supabase
+    .from("profile_drafts")
+    .select("name, bio, location, website, avatar_url")
+    .eq("id", user.id)
+    .maybeSingle();
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-6">
-      <div className="w-full max-w-[380px] rounded-[16px] border border-line bg-surface p-8 text-center">
-        <h1 className="text-[22px] font-bold tracking-[-0.02em] text-fg">
-          Welcome, @{profile.username}
-        </h1>
-        <p className="mt-2 text-[14px] text-muted">{user.email}</p>
-        <p className="mt-4 text-[13px] text-muted-2">
-          Your public shelf: liyo.dev/{profile.username}
-        </p>
-        <p className="mt-1 text-[13px] text-muted-2">
-          The real editor (blocks, drafts, publish) gets built next.
-        </p>
-        <form action={signOut} className="mt-6">
-          <button
-            type="submit"
-            className="rounded-[10px] border border-line-2 px-4 py-[9px] text-[14px] font-medium text-fg transition-colors hover:border-fg"
-          >
-            Log out
-          </button>
-        </form>
-      </div>
-    </main>
+    <ShelfEditor
+      userId={user.id}
+      username={profile.username}
+      draft={
+        draft ?? {
+          name: null,
+          bio: null,
+          location: null,
+          website: null,
+          avatar_url: null,
+        }
+      }
+      published={profile}
+    />
   );
 }
