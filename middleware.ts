@@ -9,13 +9,18 @@ import { NextResponse, type NextRequest } from "next/server";
  *    from a /dashboard folder, while liyo.dev serves the marketing
  *    site and public /[username] shelves. The visitor never sees
  *    "/dashboard" in the URL; it's an internal rewrite.
+ *
+ *    /auth/* is excluded from this rewrite — it has to stay at the
+ *    literal path Supabase redirects to after a magic-link click.
  */
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") || "";
   const isDashboard = hostname.startsWith("shelf.");
 
   const url = request.nextUrl.clone();
-  if (isDashboard && !url.pathname.startsWith("/dashboard")) {
+  const isAuthRoute = url.pathname.startsWith("/auth");
+
+  if (isDashboard && !isAuthRoute && !url.pathname.startsWith("/dashboard")) {
     url.pathname = `/dashboard${url.pathname}`;
   }
 
