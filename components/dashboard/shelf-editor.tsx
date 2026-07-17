@@ -36,9 +36,11 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   const [showEdit, setShowEdit] = useState(false);
   const [publishStatus, setPublishStatus] = useState<"idle" | "publishing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const isPublished = published?.published_at != null;
   const hasChanges = !fieldsMatch(draft, published);
+  const liveUrl = `https://liyo.dev/${username}`;
 
   async function handlePublish() {
     setPublishStatus("publishing");
@@ -68,6 +70,12 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
     router.refresh();
   }
 
+  async function handleShare() {
+    await navigator.clipboard.writeText(liveUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   async function signOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -79,22 +87,29 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
 
   return (
     <div className="flex w-full max-w-[560px] flex-col items-center">
+      <div className="mb-4 flex w-full items-center justify-end gap-2">
+        <button
+          onClick={handleShare}
+          className="rounded-[10px] border border-line-2 px-4 py-[9px] text-[13.5px] font-medium text-fg hover:border-fg"
+        >
+          {copied ? "Copied!" : "Share"}
+        </button>
+        <button
+          onClick={() => setShowEdit(true)}
+          className="rounded-[10px] bg-accent px-4 py-[9px] text-[13.5px] font-semibold text-accent-fg hover:bg-accent-hover"
+        >
+          Edit profile
+        </button>
+      </div>
+
       <div className="w-full rounded-[16px] border border-line bg-surface p-8">
-        <div className="flex items-start justify-between">
-          <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
-            {draft.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={draft.avatar_url} alt={draft.name || username} className="h-full w-full object-cover" />
-            ) : (
-              initial
-            )}
-          </div>
-          <button
-            onClick={() => setShowEdit(true)}
-            className="rounded-[9px] border border-line-2 px-3 py-[7px] text-[13px] font-medium text-fg hover:border-fg"
-          >
-            Edit profile
-          </button>
+        <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
+          {draft.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={draft.avatar_url} alt={draft.name || username} className="h-full w-full object-cover" />
+          ) : (
+            initial
+          )}
         </div>
 
         <h1 className="mt-4 text-[21px] font-bold tracking-[-0.01em] text-fg">
@@ -132,7 +147,7 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
       {error && <p className="mt-2 text-[13px] text-coral-text">{error}</p>}
 
       <div className="mt-6 flex items-center gap-4 text-[13px]">
-        <a href={`https://liyo.dev/${username}`} target="_blank" rel="noreferrer" className="text-sea-deep hover:underline">View your live shelf &rarr;</a>
+        <a href={liveUrl} target="_blank" rel="noreferrer" className="text-sea-deep hover:underline">View your live shelf &rarr;</a>
         <button onClick={signOut} className="text-muted hover:text-fg">
           Log out
         </button>
