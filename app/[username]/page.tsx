@@ -36,32 +36,36 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const hasSections = Array.isArray(profile.sections) && profile.sections.length > 0;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-[760px] flex-col items-center px-6 py-20">
-      <div className="flex h-[104px] w-[104px] items-center justify-center rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-surface font-mono text-[15px] text-muted">
-        {profile.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profile.avatar_url}
-            alt={profile.name || profile.username}
-            className="h-full w-full rounded-full object-cover"
-          />
-        ) : (
-          initial
-        )}
+    <main className="mx-auto flex min-h-screen w-full max-w-[760px] flex-col px-6 py-16">
+      <div className="flex items-start gap-5">
+        <div className="flex h-[88px] w-[88px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-surface font-mono text-[14px] text-muted">
+          {profile.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt={profile.name || profile.username}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            initial
+          )}
+        </div>
+
+        <div className="pt-1">
+          <h1 className="text-[24px] font-bold tracking-[-0.015em] text-fg">
+            {profile.name || `@${profile.username}`}
+          </h1>
+          <p className="mt-0.5 text-[13.5px] text-muted">@{profile.username}</p>
+        </div>
       </div>
 
-      <h1 className="mt-5 text-[26px] font-bold tracking-[-0.015em] text-fg">
-        {profile.name || `@${profile.username}`}
-      </h1>
-      <p className="mt-1 text-[14px] text-muted">@{profile.username}</p>
-
       {profile.bio && (
-        <p className="mt-4 max-w-[34em] text-center text-[14.5px] leading-[1.6] text-muted">
+        <p className="mt-5 max-w-[34em] text-[14.5px] leading-[1.6] text-muted">
           {profile.bio}
         </p>
       )}
 
-      <div className="mt-10 w-full max-w-[420px] rounded-[16px] border border-line bg-surface px-6 py-10 text-center">
+      <div className="mt-8 w-full rounded-[16px] border border-line bg-surface px-6 py-10 text-center">
         {hasSections ? (
           <p className="text-[14px] text-muted">
             The full shelf renders here once blocks are wired up.
