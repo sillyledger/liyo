@@ -86,8 +86,9 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   const initial = (draft.name || username).charAt(0).toUpperCase();
 
   return (
-    <div className="flex w-full max-w-[560px] flex-col items-center">
-      <div className="mb-4 flex w-full items-center justify-end gap-2">
+    <div className="w-full">
+      {/* Page-level toolbar — spans the full content width, matching the mockup's true top-right positioning */}
+      <div className="mb-6 flex w-full justify-end gap-2">
         <button
           onClick={handleShare}
           className="rounded-[10px] border border-line-2 px-4 py-[9px] text-[13.5px] font-medium text-fg hover:border-fg"
@@ -102,55 +103,57 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
         </button>
       </div>
 
-      <div className="w-full rounded-[16px] border border-line bg-surface p-8">
-        <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
-          {draft.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={draft.avatar_url} alt={draft.name || username} className="h-full w-full object-cover" />
-          ) : (
-            initial
+      <div className="flex w-full max-w-[560px] flex-col">
+        <div className="w-full rounded-[16px] border border-line bg-surface p-8">
+          <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
+            {draft.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={draft.avatar_url} alt={draft.name || username} className="h-full w-full object-cover" />
+            ) : (
+              initial
+            )}
+          </div>
+
+          <h1 className="mt-4 text-[21px] font-bold tracking-[-0.01em] text-fg">
+            {draft.name || `@${username}`}
+          </h1>
+          <p className="text-[13.5px] text-muted">@{username}</p>
+
+          {draft.bio && (
+            <p className="mt-3 text-[14px] leading-[1.55] text-muted">{draft.bio}</p>
           )}
+
+          <div className="mt-3 flex flex-wrap gap-4 text-[12.5px] text-muted-2">
+            {draft.location && <span>{draft.location}</span>}
+            {draft.website && <span>{draft.website}</span>}
+          </div>
         </div>
 
-        <h1 className="mt-4 text-[21px] font-bold tracking-[-0.01em] text-fg">
-          {draft.name || `@${username}`}
-        </h1>
-        <p className="text-[13.5px] text-muted">@{username}</p>
-
-        {draft.bio && (
-          <p className="mt-3 text-[14px] leading-[1.55] text-muted">{draft.bio}</p>
-        )}
-
-        <div className="mt-3 flex flex-wrap gap-4 text-[12.5px] text-muted-2">
-          {draft.location && <span>{draft.location}</span>}
-          {draft.website && <span>{draft.website}</span>}
+        <div className="mt-4 flex w-full items-center justify-between rounded-[14px] border border-line bg-surface px-5 py-4">
+          <div>
+            <p className="text-[13.5px] font-medium text-fg">
+              {isPublished ? "Published" : "Not published yet"}
+            </p>
+            <p className="text-[12px] text-muted-2">
+              {hasChanges ? "You have unpublished changes." : "Draft matches your live shelf."}
+            </p>
+          </div>
+          <button
+            onClick={handlePublish}
+            disabled={publishStatus === "publishing" || !hasChanges}
+            className="rounded-[10px] bg-accent px-4 py-[9px] text-[14px] font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
+          >
+            {publishStatus === "publishing" ? "Publishing…" : "Publish"}
+          </button>
         </div>
-      </div>
+        {error && <p className="mt-2 text-[13px] text-coral-text">{error}</p>}
 
-      <div className="mt-4 flex w-full items-center justify-between rounded-[14px] border border-line bg-surface px-5 py-4">
-        <div>
-          <p className="text-[13.5px] font-medium text-fg">
-            {isPublished ? "Published" : "Not published yet"}
-          </p>
-          <p className="text-[12px] text-muted-2">
-            {hasChanges ? "You have unpublished changes." : "Draft matches your live shelf."}
-          </p>
+        <div className="mt-6 flex items-center gap-4 text-[13px]">
+          <a href={liveUrl} target="_blank" rel="noreferrer" className="text-sea-deep hover:underline">View your live shelf &rarr;</a>
+          <button onClick={signOut} className="text-muted hover:text-fg">
+            Log out
+          </button>
         </div>
-        <button
-          onClick={handlePublish}
-          disabled={publishStatus === "publishing" || !hasChanges}
-          className="rounded-[10px] bg-accent px-4 py-[9px] text-[14px] font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
-        >
-          {publishStatus === "publishing" ? "Publishing…" : "Publish"}
-        </button>
-      </div>
-      {error && <p className="mt-2 text-[13px] text-coral-text">{error}</p>}
-
-      <div className="mt-6 flex items-center gap-4 text-[13px]">
-        <a href={liveUrl} target="_blank" rel="noreferrer" className="text-sea-deep hover:underline">View your live shelf &rarr;</a>
-        <button onClick={signOut} className="text-muted hover:text-fg">
-          Log out
-        </button>
       </div>
 
       {showEdit && (
