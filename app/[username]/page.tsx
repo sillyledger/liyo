@@ -69,18 +69,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <div className="mt-3 flex flex-wrap gap-4 text-[13px] text-muted-2">
           {profile.location && <span>{profile.location}</span>}
           {profile.website && (
-            
-              href={
-                profile.website.startsWith("http")
-                  ? profile.website
-                  : `https://${profile.website}`
-              }
-              target="_blank"
-              rel="noreferrer"
-              className="text-sea-deep hover:underline"
-            >
-              {profile.website}
-            </a>
+            <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noreferrer" className="text-sea-deep hover:underline">{profile.website}</a>
           )}
         </div>
       )}
