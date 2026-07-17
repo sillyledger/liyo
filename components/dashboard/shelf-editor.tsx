@@ -81,8 +81,13 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
     <div className="flex w-full max-w-[560px] flex-col items-center">
       <div className="w-full rounded-[16px] border border-line bg-surface p-8">
         <div className="flex items-start justify-between">
-          <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
-            {initial}
+          <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
+            {draft.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={draft.avatar_url} alt={draft.name || username} className="h-full w-full object-cover" />
+            ) : (
+              initial
+            )}
           </div>
           <button
             onClick={() => setShowEdit(true)}
