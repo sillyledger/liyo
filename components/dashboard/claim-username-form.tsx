@@ -27,11 +27,17 @@ export function ClaimUsernameForm({ userId }: { userId: string }) {
     setStatus("checking");
     const supabase = createClient();
 
-    const { data: existing } = await supabase
+    const { data: existing, error: checkError } = await supabase
       .from("profiles")
       .select("id")
       .eq("username", clean)
       .maybeSingle();
+
+    if (checkError) {
+      setStatus("error");
+      setError(`Check failed: ${checkError.message}`);
+      return;
+    }
 
     if (existing) {
       setStatus("error");
@@ -52,15 +58,21 @@ export function ClaimUsernameForm({ userId }: { userId: string }) {
       setError(
         profileError.code === "23505"
           ? "That username was just taken — try another."
-          : "Something went wrong — try again."
+          : `Insert failed: ${profileError.message}`
       );
       return;
     }
 
-    await supabase.from("profile_drafts").insert({
+    const { error: draftError } = await supabase.from("profile_drafts").insert({
       id: userId,
       sections: [],
     });
+
+    if (draftError) {
+      setStatus("error");
+      setError(`Draft insert failed: ${draftError.message}`);
+      return;
+    }
 
     router.refresh();
   }
