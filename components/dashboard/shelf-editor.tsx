@@ -11,6 +11,7 @@ interface ProfileFields {
   location: string | null;
   website: string | null;
   avatar_url: string | null;
+  quote: string | null;
 }
 
 interface ShelfEditorProps {
@@ -27,7 +28,8 @@ function fieldsMatch(a: ProfileFields, b: ProfileFields | null) {
     a.bio === b.bio &&
     a.location === b.location &&
     a.website === b.website &&
-    a.avatar_url === b.avatar_url
+    a.avatar_url === b.avatar_url &&
+    a.quote === b.quote
   );
 }
 
@@ -55,6 +57,7 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
         location: draft.location,
         website: draft.website,
         avatar_url: draft.avatar_url,
+        quote: draft.quote,
         published_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -103,30 +106,40 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
         </button>
       </div>
 
-      <div className="flex w-full max-w-[560px] flex-col">
-        <div className="w-full rounded-[16px] border border-line bg-surface p-8">
-          <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
-            {draft.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={draft.avatar_url} alt={draft.name || username} className="h-full w-full object-cover" />
-            ) : (
-              initial
+      <div className="flex w-full max-w-[760px] flex-col">
+        <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="w-full max-w-[560px] rounded-[16px] border border-line bg-surface p-8">
+            <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
+              {draft.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={draft.avatar_url} alt={draft.name || username} className="h-full w-full object-cover" />
+              ) : (
+                initial
+              )}
+            </div>
+
+            <h1 className="mt-4 text-[21px] font-bold tracking-[-0.01em] text-fg">
+              {draft.name || `@${username}`}
+            </h1>
+            <p className="text-[13.5px] text-muted">@{username}</p>
+
+            {draft.bio && (
+              <p className="mt-3 text-[14px] leading-[1.55] text-muted">{draft.bio}</p>
             )}
+
+            <div className="mt-3 flex flex-wrap gap-4 text-[12.5px] text-muted-2">
+              {draft.location && <span>{draft.location}</span>}
+              {draft.website && <span>{draft.website}</span>}
+            </div>
           </div>
 
-          <h1 className="mt-4 text-[21px] font-bold tracking-[-0.01em] text-fg">
-            {draft.name || `@${username}`}
-          </h1>
-          <p className="text-[13.5px] text-muted">@{username}</p>
-
-          {draft.bio && (
-            <p className="mt-3 text-[14px] leading-[1.55] text-muted">{draft.bio}</p>
+          {draft.quote && (
+            <div className="w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:max-w-[240px]">
+              <span className="font-serif text-[40px] leading-none text-coral-deep">&ldquo;</span>
+              <p className="mt-1 text-[14px] italic leading-[1.55] text-fg">{draft.quote}</p>
+              <p className="mt-3 text-[12.5px] text-muted-2">— {draft.name || username}</p>
+            </div>
           )}
-
-          <div className="mt-3 flex flex-wrap gap-4 text-[12.5px] text-muted-2">
-            {draft.location && <span>{draft.location}</span>}
-            {draft.website && <span>{draft.website}</span>}
-          </div>
         </div>
 
         <div className="mt-4 flex w-full items-center justify-between rounded-[14px] border border-line bg-surface px-5 py-4">

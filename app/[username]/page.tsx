@@ -24,7 +24,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const supabase = createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, name, bio, location, website, avatar_url, sections")
+    .select("username, name, bio, location, website, avatar_url, quote, sections")
     .eq("username", params.username)
     .maybeSingle();
 
@@ -37,26 +37,36 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[760px] flex-col px-6 py-16">
-      <div className="flex items-start gap-5">
-        <div className="flex h-[88px] w-[88px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-surface font-mono text-[14px] text-muted">
-          {profile.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatar_url}
-              alt={profile.name || profile.username}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            initial
-          )}
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-5">
+          <div className="flex h-[88px] w-[88px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-surface font-mono text-[14px] text-muted">
+            {profile.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.avatar_url}
+                alt={profile.name || profile.username}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              initial
+            )}
+          </div>
+
+          <div className="pt-1">
+            <h1 className="text-[24px] font-bold tracking-[-0.015em] text-fg">
+              {profile.name || `@${profile.username}`}
+            </h1>
+            <p className="mt-0.5 text-[13.5px] text-muted">@{profile.username}</p>
+          </div>
         </div>
 
-        <div className="pt-1">
-          <h1 className="text-[24px] font-bold tracking-[-0.015em] text-fg">
-            {profile.name || `@${profile.username}`}
-          </h1>
-          <p className="mt-0.5 text-[13.5px] text-muted">@{profile.username}</p>
-        </div>
+        {profile.quote && (
+          <div className="w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:max-w-[280px]">
+            <span className="font-serif text-[40px] leading-none text-coral-deep">&ldquo;</span>
+            <p className="mt-1 text-[14px] italic leading-[1.55] text-fg">{profile.quote}</p>
+            <p className="mt-3 text-[12.5px] text-muted-2">— {profile.name || profile.username}</p>
+          </div>
+        )}
       </div>
 
       {profile.bio && (

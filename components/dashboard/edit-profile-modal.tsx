@@ -13,6 +13,7 @@ interface EditProfileModalProps {
     location: string | null;
     website: string | null;
     avatar_url: string | null;
+    quote: string | null;
   };
   onClose: () => void;
 }
@@ -22,6 +23,7 @@ const inputClass =
 const labelClass = "mb-1.5 block text-[12.5px] font-medium text-muted";
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024; // 2MB
 const MAX_BIO_LENGTH = 200;
+const MAX_QUOTE_LENGTH = 150;
 
 export function EditProfileModal({ userId, initial, onClose }: EditProfileModalProps) {
   const router = useRouter();
@@ -30,6 +32,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
   const [location, setLocation] = useState(initial.location ?? "");
   const [website, setWebsite] = useState(initial.website ?? "");
   const [avatarUrl, setAvatarUrl] = useState(initial.avatar_url ?? "");
+  const [quote, setQuote] = useState(initial.quote ?? "");
   const [uploading, setUploading] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
@@ -85,6 +88,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
         location: location || null,
         website: website || null,
         avatar_url: avatarUrl || null,
+        quote: quote || null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", userId);
@@ -101,6 +105,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
 
   const initialLetter = (name || "?").charAt(0).toUpperCase();
   const bioNearLimit = bio.length >= MAX_BIO_LENGTH - 20;
+  const quoteNearLimit = quote.length >= MAX_QUOTE_LENGTH - 20;
 
   return (
     <Modal title="Edit profile" onClose={onClose}>
@@ -173,6 +178,21 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
               placeholder="you.com"
             />
           </div>
+        </div>
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className={labelClass.replace("mb-1.5 ", "")}>Quote</label>
+            <span className={`text-[11.5px] ${quoteNearLimit ? "text-coral-text" : "text-muted-2"}`}>
+              {quote.length}/{MAX_QUOTE_LENGTH}
+            </span>
+          </div>
+          <textarea
+            className={`${inputClass} min-h-[60px] resize-none`}
+            value={quote}
+            onChange={(e) => setQuote(e.target.value)}
+            maxLength={MAX_QUOTE_LENGTH}
+            placeholder="A line that sums up how you build"
+          />
         </div>
 
         {error && <p className="text-[13px] text-coral-text">{error}</p>}
