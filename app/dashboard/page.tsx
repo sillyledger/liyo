@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ClaimUsernameForm } from "@/components/dashboard/claim-username-form";
 import { ShelfEditor } from "@/components/dashboard/shelf-editor";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 export default async function DashboardHome() {
   const supabase = createClient();
@@ -21,9 +22,9 @@ export default async function DashboardHome() {
 
   if (!profile) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-bg px-6">
+      <DashboardShell>
         <ClaimUsernameForm userId={user.id} />
-      </main>
+      </DashboardShell>
     );
   }
 
@@ -34,19 +35,21 @@ export default async function DashboardHome() {
     .maybeSingle();
 
   return (
-    <ShelfEditor
-      userId={user.id}
-      username={profile.username}
-      draft={
-        draft ?? {
-          name: null,
-          bio: null,
-          location: null,
-          website: null,
-          avatar_url: null,
+    <DashboardShell>
+      <ShelfEditor
+        userId={user.id}
+        username={profile.username}
+        draft={
+          draft ?? {
+            name: null,
+            bio: null,
+            location: null,
+            website: null,
+            avatar_url: null,
+          }
         }
-      }
-      published={profile}
-    />
+        published={profile}
+      />
+    </DashboardShell>
   );
 }
