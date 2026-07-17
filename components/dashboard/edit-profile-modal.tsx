@@ -21,6 +21,7 @@ const inputClass =
   "w-full rounded-[10px] border border-line-2 bg-bg px-4 py-[10px] text-[14px] text-fg outline-none focus:border-accent";
 const labelClass = "mb-1.5 block text-[12.5px] font-medium text-muted";
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024; // 2MB
+const MAX_BIO_LENGTH = 200;
 
 export function EditProfileModal({ userId, initial, onClose }: EditProfileModalProps) {
   const router = useRouter();
@@ -36,7 +37,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    e.target.value = ""; // allow re-selecting the same file later
+    e.target.value = "";
     if (!file) return;
 
     setAvatarError(null);
@@ -99,6 +100,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
   }
 
   const initialLetter = (name || "?").charAt(0).toUpperCase();
+  const bioNearLimit = bio.length >= MAX_BIO_LENGTH - 20;
 
   return (
     <Modal title="Edit profile" onClose={onClose}>
@@ -138,11 +140,17 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
           />
         </div>
         <div>
-          <label className={labelClass}>Bio</label>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className={labelClass.replace("mb-1.5 ", "")}>Bio</label>
+            <span className={`text-[11.5px] ${bioNearLimit ? "text-coral-text" : "text-muted-2"}`}>
+              {bio.length}/{MAX_BIO_LENGTH}
+            </span>
+          </div>
           <textarea
             className={`${inputClass} min-h-[80px] resize-none`}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
+            maxLength={MAX_BIO_LENGTH}
             placeholder="What you're building, in a sentence or two"
           />
         </div>
