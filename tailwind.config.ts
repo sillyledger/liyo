@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -8,21 +9,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: {
-          DEFAULT: "#16140E",
-          2: "#1E1B13",
-          3: "#262218",
+        slate: "#2B2539",
+        oatmeal: "#EBE9E4",
+        sea: {
+          DEFAULT: "#BED3CC",
+          deep: "#7FA394",
         },
-        paper: "#F3EEE1",
-        muted: "#A29C8B",
-        leaf: {
-          DEFAULT: "#5EC97A",
-          bright: "#7BE49A",
-          deep: "#2C7B45",
+        coral: {
+          DEFAULT: "#EFC8C8",
+          deep: "#C98D8D",
+          text: "#7A3D3D",
         },
-        amber: "#E8B45A",
-        line: "rgba(243,238,225,0.09)",
-        line2: "rgba(243,238,225,0.14)",
+        umber: {
+          DEFAULT: "#7B6767",
+          deep: "#5A4A4A",
+          light: "#A08D8D",
+        },
+        chartreuse: "#EEEFC8",
+        bg: "var(--bg)",
+        surface: "var(--surface)",
+        "surface-2": "var(--surface-2)",
+        fg: "var(--fg)",
+        muted: "var(--muted)",
+        "muted-2": "var(--muted-2)",
+        line: "var(--line)",
+        "line-2": "var(--line-2)",
+        accent: "var(--accent)",
+        "accent-fg": "var(--accent-fg)",
+        "accent-hover": "var(--accent-hover)",
+        warm: "var(--warm)",
+        "ledge-a": "var(--ledge-a)",
+        "ledge-b": "var(--ledge-b)",
       },
       fontFamily: {
         sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
