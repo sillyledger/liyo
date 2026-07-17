@@ -78,7 +78,7 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   const initial = (draft.name || username).charAt(0).toUpperCase();
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-[560px] flex-col items-center bg-bg px-6 py-16">
+    <div className="flex w-full max-w-[560px] flex-col items-center">
       <div className="w-full rounded-[16px] border border-line bg-surface p-8">
         <div className="flex items-start justify-between">
           <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
@@ -140,6 +140,6 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
           onClose={() => setShowEdit(false)}
         />
       )}
-    </main>
+    </div>
   );
 }
