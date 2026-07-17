@@ -127,14 +127,7 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
       {error && <p className="mt-2 text-[13px] text-coral-text">{error}</p>}
 
       <div className="mt-6 flex items-center gap-4 text-[13px]">
-        
-          href={`https://liyo.dev/${username}`}
-          target="_blank"
-          rel="noreferrer"
-          className="text-sea-deep hover:underline"
-        >
-          View your live shelf &rarr;
-        </a>
+        <a href={`https://liyo.dev/${username}`} target="_blank" rel="noreferrer" className="text-sea-deep hover:underline">View your live shelf &rarr;</a>
         <button onClick={signOut} className="text-muted hover:text-fg">
           Log out
         </button>
