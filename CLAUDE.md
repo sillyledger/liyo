@@ -243,12 +243,19 @@ assuming the reported line is where the real problem is.
   `CLAUDE.md`'s design intent applies to the **public** page
   (`app/[username]/page.tsx`), which hides each card until it has real
   content, same as bio/quote already do.
-- Mission/Current Focus and Workspace sit **side by side in one row**
-  (Mission wider via `flex-1`, Workspace fixed-width via `flex-shrink-0
-  sm:w-[240px]`), on both `shelf-editor.tsx` and
-  `app/[username]/page.tsx` — same two-card-row technique already used
-  for the profile card + Quote card. Two gotchas worth remembering for
-  future side-by-side card rows:
+- Mission/Current Focus and Workspace sit **side by side in one row**,
+  an 8/4-of-12 split (`grid grid-cols-1 gap-4 sm:grid-cols-12`, cards
+  use `sm:col-span-8`/`sm:col-span-4`) matching the mockup's bento
+  proportions — on both `shelf-editor.tsx` and `app/[username]/page.tsx`.
+  The profile card + Quote card row above it uses a simpler two-card
+  technique instead (`flex-1` grows to fill space, the narrower card is
+  `flex-shrink-0` + a fixed width) since it doesn't need an exact
+  fractional split. On the public page, since either card can be absent
+  independently (only the dashboard always renders both), the span is
+  computed at runtime — `sm:col-span-12` instead of 8 or 4 whenever the
+  other card has no content — so a lone card fills the row rather than
+  sitting at 66%/33% width with dead space beside it.
+  Two gotchas worth remembering for future side-by-side card rows:
   - Any per-card edit-pencil button (`CardEditButton`, absolutely
     positioned) needs an explicit `z-10`. A card's own inner content
     (e.g. the Workspace illustration's wrapper div, which is
@@ -258,10 +265,24 @@ assuming the reported line is where the real problem is.
     later-in-DOM inner content can paint over an earlier
     absolutely-positioned button and make it unclickable, even though
     it visually looks like it's "on top."
-  - Each card in the row needs its own `w-full` + either `flex-1`
+  - Each card in a `flex` row needs its own `w-full` + either `flex-1`
     (grows) or `flex-shrink-0` + a fixed width (stays narrow) — giving
     both cards plain `w-full` with no flex sizing collapses them back
-    into a stacked column instead of a row.
+    into a stacked column instead of a row. (Cards in a `grid` row
+    avoid this — an explicit `col-span-*` is enough.)
+- **Content max-width is 1180px**, matching the approved mockup's
+  `.main` container (`liyo-profile-mockup-palette2.html`, if still
+  around — width next to its sidebar). Both `shelf-editor.tsx`'s
+  outermost wrapper and `app/[username]/page.tsx`'s `<main>` use
+  `max-w-[1180px]`, not the earlier, too-narrow `max-w-[760px]` (which
+  caused short text like tool/gear names to wrap awkwardly). Any new
+  card row should size itself within this same 1180px column rather
+  than introducing its own narrower max-width — that's what caused this
+  bug in the first place: the profile header card was capped at
+  `max-w-[560px]` independently of the row width, so it looked narrow
+  above wider rows once those rows were widened. Keep the header
+  profile card sized with `flex-1` (no independent max-width) so it
+  always spans whatever the shared container width is.
 
 **In progress / next up:**
 - Everything else from the bento grid mockup (Tools of the Trade,

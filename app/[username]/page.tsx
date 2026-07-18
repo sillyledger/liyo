@@ -42,9 +42,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const hasMissionContent = Boolean(profile.mission) || currentFocusItems.length > 0;
   const hasWorkspaceContent = gearItems.length > 0;
   const hasNothingElse = !hasMissionContent && !hasWorkspaceContent;
+  const missionColSpan = hasWorkspaceContent ? "sm:col-span-8" : "sm:col-span-12";
+  const workspaceColSpan = hasMissionContent ? "sm:col-span-4" : "sm:col-span-12";
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[760px] flex-col px-6 py-16">
+    <main className="mx-auto flex min-h-screen w-full max-w-[1180px] flex-col px-6 py-16">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-5">
           <div className="flex h-[88px] w-[88px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-surface font-mono text-[14px] text-muted">
@@ -93,9 +95,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       )}
 
       {(hasMissionContent || hasWorkspaceContent) && (
-        <div className="mt-8 flex w-full flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="mt-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
           {hasMissionContent && (
-            <div className="w-full flex-1 rounded-[16px] border border-line bg-surface p-6">
+            <div className={`w-full rounded-[16px] border border-line bg-surface p-6 ${missionColSpan}`}>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
                   <span className={CARD_TAG}>Mission</span>
@@ -123,7 +125,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           )}
 
           {hasWorkspaceContent && (
-            <div className="w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:w-[240px]">
+            <div className={`w-full rounded-[16px] border border-line bg-surface p-6 ${workspaceColSpan}`}>
               <div className="relative h-[88px] w-full overflow-hidden rounded-[12px]">
                 <WorkspaceIllustration className="h-full w-full" />
                 {profile.location && (

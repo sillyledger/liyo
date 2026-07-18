@@ -142,9 +142,9 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
         </button>
       </div>
 
-      <div className="flex w-full max-w-[760px] flex-col">
+      <div className="flex w-full max-w-[1180px] flex-col">
         <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start">
-          <div className="w-full max-w-[560px] rounded-[16px] border border-line bg-surface p-8">
+          <div className="w-full flex-1 rounded-[16px] border border-line bg-surface p-8">
             <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
               {draft.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -181,9 +181,9 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
         {/* These two cards always render on the dashboard (owner-only) so there's
             an edit-pencil entry point before any content exists; the public
             profile hides them entirely until they have content. Side by side —
-            Mission/Current Focus wider (flex-1), Workspace narrower (fixed). */}
-        <div className="mt-4 flex w-full flex-col gap-4 sm:flex-row sm:items-start">
-          <div className="relative w-full flex-1 rounded-[16px] border border-line bg-surface p-6">
+            an 8/4-of-12 grid split, matching the mockup's bento proportions. */}
+        <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
+          <div className="relative w-full rounded-[16px] border border-line bg-surface p-6 sm:col-span-8">
             <CardEditButton onClick={() => setShowEditMission(true)} label="Edit mission & current focus" />
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
@@ -212,7 +212,7 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
             </div>
           </div>
 
-          <div className="relative w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:w-[240px]">
+          <div className="relative w-full rounded-[16px] border border-line bg-surface p-6 sm:col-span-4">
             <CardEditButton onClick={() => setShowEditWorkspace(true)} label="Edit workspace" />
             <div className="relative h-[88px] w-full overflow-hidden rounded-[12px]">
               <WorkspaceIllustration className="h-full w-full" />
