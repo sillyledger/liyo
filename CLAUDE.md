@@ -235,13 +235,31 @@ assuming the reported line is where the real problem is.
   `CLAUDE.md`'s design intent applies to the **public** page
   (`app/[username]/page.tsx`), which hides each card until it has real
   content, same as bio/quote already do.
+- Mission/Current Focus and Workspace sit **side by side in one row**
+  (Mission wider via `flex-1`, Workspace fixed-width via `flex-shrink-0
+  sm:w-[240px]`), on both `shelf-editor.tsx` and
+  `app/[username]/page.tsx` — same two-card-row technique already used
+  for the profile card + Quote card. Two gotchas worth remembering for
+  future side-by-side card rows:
+  - Any per-card edit-pencil button (`CardEditButton`, absolutely
+    positioned) needs an explicit `z-10`. A card's own inner content
+    (like the Workspace gradient box) is often `position: relative`
+    too — CSS stacks same-z-index positioned siblings in DOM order, so
+    without an explicit z-index the later-in-DOM inner content can
+    paint over an earlier absolutely-positioned button and make it
+    unclickable, even though it visually looks like it's "on top."
+  - Each card in the row needs its own `w-full` + either `flex-1`
+    (grows) or `flex-shrink-0` + a fixed width (stays narrow) — giving
+    both cards plain `w-full` with no flex sizing collapses them back
+    into a stacked column instead of a row.
 
 **In progress / next up:**
-- Everything else from the bento grid mockup (Mission/Current Focus,
-  Workspace, Tools of the Trade, Building, AI Workspace, Partner Shelf,
-  Playlist, Currently Reading) — none of these have modals or schema
-  yet. Follow the same 3-layer-constraint + modal + draft/publish
-  pattern established for the header fields.
+- Everything else from the bento grid mockup (Tools of the Trade,
+  Building, AI Workspace, Partner Shelf, Playlist, Currently Reading) —
+  none of these have modals or schema yet. Follow the same
+  3-layer-constraint + modal + draft/publish pattern established for
+  the header fields, and reuse the `lib/sections.ts` block-array
+  pattern for anything list-shaped.
 - Dark mode toggle (deferred on purpose — see Design System section
   above; foundation is ready, just needs the toggle UI + `dark` class
   wiring in `app/layout.tsx`).

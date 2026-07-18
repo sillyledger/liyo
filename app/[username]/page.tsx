@@ -93,54 +93,58 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </div>
       )}
 
-      {hasMissionContent && (
-        <div className="mt-8 w-full rounded-[16px] border border-line bg-surface p-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <span className={CARD_TAG}>Mission</span>
-              {profile.mission && (
-                <p className="mt-2 text-[14px] leading-[1.6] text-muted">{profile.mission}</p>
-              )}
-            </div>
-            {currentFocusItems.length > 0 && (
-              <div>
-                <span className={CARD_TAG}>Current focus</span>
-                <ul className="mt-2 flex flex-col gap-2">
-                  {currentFocusItems.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-[13.5px] text-fg">
-                      <span className="mt-[3px] flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center rounded-full bg-sea text-[10px] text-slate">
-                        &#10003;
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+      {(hasMissionContent || hasWorkspaceContent) && (
+        <div className="mt-8 flex w-full flex-col gap-4 sm:flex-row sm:items-start">
+          {hasMissionContent && (
+            <div className="w-full flex-1 rounded-[16px] border border-line bg-surface p-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <span className={CARD_TAG}>Mission</span>
+                  {profile.mission && (
+                    <p className="mt-2 text-[14px] leading-[1.6] text-muted">{profile.mission}</p>
+                  )}
+                </div>
+                {currentFocusItems.length > 0 && (
+                  <div>
+                    <span className={CARD_TAG}>Current focus</span>
+                    <ul className="mt-2 flex flex-col gap-2">
+                      {currentFocusItems.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[13.5px] text-fg">
+                          <span className="mt-[3px] flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center rounded-full bg-sea text-[10px] text-slate">
+                            &#10003;
+                          </span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {hasWorkspaceContent && (
-        <div className="mt-4 w-full rounded-[16px] border border-line bg-surface p-6">
-          <div
-            className="relative h-[88px] w-full overflow-hidden rounded-[12px]"
-            style={{ backgroundImage: gradient.backgroundImage }}
-          >
-            {profile.location && (
-              <span className="absolute right-3 top-3 rounded-full bg-slate/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-oatmeal backdrop-blur-sm">
-                {profile.location}
-              </span>
-            )}
-          </div>
-          <span className={`${CARD_TAG} mt-4 block`}>Workspace</span>
-          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
-            {gearItems.map((item, i) => (
-              <span key={i} className="text-[13px] text-muted">
-                {item}
-              </span>
-            ))}
-          </div>
+          {hasWorkspaceContent && (
+            <div className="w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:w-[240px]">
+              <div
+                className="relative h-[88px] w-full overflow-hidden rounded-[12px]"
+                style={{ backgroundImage: gradient.backgroundImage }}
+              >
+                {profile.location && (
+                  <span className="absolute right-3 top-3 rounded-full bg-slate/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-oatmeal backdrop-blur-sm">
+                    {profile.location}
+                  </span>
+                )}
+              </div>
+              <span className={`${CARD_TAG} mt-4 block`}>Workspace</span>
+              <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {gearItems.map((item, i) => (
+                  <span key={i} className="text-[13px] text-muted">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

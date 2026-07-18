@@ -49,7 +49,7 @@ function CardEditButton({ onClick, label }: { onClick: () => void; label: string
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-fg"
+      className="absolute right-4 top-4 z-10 flex h-7 w-7 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-fg"
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
         <path
@@ -181,60 +181,63 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
 
         {/* These two cards always render on the dashboard (owner-only) so there's
             an edit-pencil entry point before any content exists; the public
-            profile hides them entirely until they have content. */}
-        <div className="relative mt-4 w-full rounded-[16px] border border-line bg-surface p-6">
-          <CardEditButton onClick={() => setShowEditMission(true)} label="Edit mission & current focus" />
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <span className={CARD_TAG}>Mission</span>
-              <p className="mt-2 text-[14px] leading-[1.6] text-muted">
-                {draft.mission || <span className="italic text-muted-2">No mission yet.</span>}
-              </p>
+            profile hides them entirely until they have content. Side by side —
+            Mission/Current Focus wider (flex-1), Workspace narrower (fixed). */}
+        <div className="mt-4 flex w-full flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="relative w-full flex-1 rounded-[16px] border border-line bg-surface p-6">
+            <CardEditButton onClick={() => setShowEditMission(true)} label="Edit mission & current focus" />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <span className={CARD_TAG}>Mission</span>
+                <p className="mt-2 text-[14px] leading-[1.6] text-muted">
+                  {draft.mission || <span className="italic text-muted-2">No mission yet.</span>}
+                </p>
+              </div>
+              <div>
+                <span className={CARD_TAG}>Current focus</span>
+                {currentFocusItems.length > 0 ? (
+                  <ul className="mt-2 flex flex-col gap-2">
+                    {currentFocusItems.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-[13.5px] text-fg">
+                        <span className="mt-[3px] flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center rounded-full bg-sea text-[10px] text-slate">
+                          &#10003;
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-[13.5px] italic text-muted-2">No items yet.</p>
+                )}
+              </div>
             </div>
-            <div>
-              <span className={CARD_TAG}>Current focus</span>
-              {currentFocusItems.length > 0 ? (
-                <ul className="mt-2 flex flex-col gap-2">
-                  {currentFocusItems.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-[13.5px] text-fg">
-                      <span className="mt-[3px] flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center rounded-full bg-sea text-[10px] text-slate">
-                        &#10003;
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-2 text-[13.5px] italic text-muted-2">No items yet.</p>
+          </div>
+
+          <div className="relative w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:w-[240px]">
+            <CardEditButton onClick={() => setShowEditWorkspace(true)} label="Edit workspace" />
+            <div
+              className="relative h-[88px] w-full overflow-hidden rounded-[12px]"
+              style={{ backgroundImage: gradient.backgroundImage }}
+            >
+              {draft.location && (
+                <span className="absolute right-3 top-3 rounded-full bg-slate/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-oatmeal backdrop-blur-sm">
+                  {draft.location}
+                </span>
               )}
             </div>
-          </div>
-        </div>
-
-        <div className="relative mt-4 w-full rounded-[16px] border border-line bg-surface p-6">
-          <CardEditButton onClick={() => setShowEditWorkspace(true)} label="Edit workspace" />
-          <div
-            className="relative h-[88px] w-full overflow-hidden rounded-[12px]"
-            style={{ backgroundImage: gradient.backgroundImage }}
-          >
-            {draft.location && (
-              <span className="absolute right-3 top-3 rounded-full bg-slate/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-oatmeal backdrop-blur-sm">
-                {draft.location}
-              </span>
+            <span className={`${CARD_TAG} mt-4 block`}>Workspace</span>
+            {gearItems.length > 0 ? (
+              <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {gearItems.map((item, i) => (
+                  <span key={i} className="text-[13px] text-muted">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-[13px] italic text-muted-2">No gear added yet.</p>
             )}
           </div>
-          <span className={`${CARD_TAG} mt-4 block`}>Workspace</span>
-          {gearItems.length > 0 ? (
-            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
-              {gearItems.map((item, i) => (
-                <span key={i} className="text-[13px] text-muted">
-                  {item}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-2 text-[13px] italic text-muted-2">No gear added yet.</p>
-          )}
         </div>
 
         <div className="mt-4 flex w-full items-center justify-between rounded-[14px] border border-line bg-surface px-5 py-4">
