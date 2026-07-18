@@ -207,12 +207,16 @@ assuming the reported line is where the real problem is.
 - **`sections jsonb` is now in use**, via `lib/sections.ts`: it holds an
   array of typed blocks (`{ type, ...fields }`), e.g.
   `{ type: "current_focus", items: string[] }` and
-  `{ type: "workspace_gear", items: string[] }`. `getSection`/
-  `getSectionItems` read a block by type; `upsertSection` replaces just
-  that one block's entry while leaving every other block in the array
-  untouched — this is the pattern future blocks (Building, AI
-  Workspace, Partner Shelf, Playlist, Currently Reading) should reuse
-  rather than inventing per-block storage.
+  `{ type: "workspace_gear", items: string[] }` (and, as of Productivity
+  Stack/AI Workspace/Building below, object-array blocks like
+  `{ type: "building", items: BuildingItem[] }`). `getSection` reads a
+  block by type; `getSectionItems` is a `string[]`-only convenience
+  wrapper for the two plain-list blocks — use `getSection(...)?.items`
+  directly for object-array blocks instead. `upsertSection` replaces
+  just one block's entry while leaving every other block in the array
+  untouched — this is the pattern future blocks (Partner Shelf,
+  Playlist, Currently Reading) should reuse rather than inventing
+  per-block storage.
 - Mission & Current Focus card — one card, two columns. `mission` is a
   real column (`profiles.mission` / `profile_drafts.mission`, 400-char
   cap enforced by a DB check constraint added by hand, per this
@@ -283,14 +287,64 @@ assuming the reported line is where the real problem is.
   above wider rows once those rows were widened. Keep the header
   profile card sized with `flex-1` (no independent max-width) so it
   always spans whatever the shared container width is.
+- **Productivity Stack, AI Workspace, and Building** — the row below
+  Mission/Current Focus + Workspace, three equal cards
+  (`sm:col-span-4` each of 12, so Building lines up directly under
+  Workspace above it, matching the mockup). Naming note: the mockup's
+  "Tools of the Trade" card was renamed **Productivity Stack** before
+  it was ever actually built — it never existed under the old name in
+  code, only in this file's roadmap list, so there was nothing to
+  migrate.
+  - Productivity Stack and AI Workspace are **identical in shape**
+    (each item is just `{ name, url }`) and share one modal component,
+    `edit-stack-modal.tsx`, parametrized by `sectionType` (
+    `"productivity_stack"` | `"ai_workspace"`) and `title` — and one
+    display component, `components/stack-card.tsx`. Storage:
+    `sections.productivity_stack` / `sections.ai_workspace`, same
+    `getSection`/`upsertSection` pattern as every other block.
+  - Building has its own modal (`edit-building-modal.tsx`) and display
+    component (`components/building-card.tsx`) since each item carries
+    two extra fields: a short `description` and a `status` of `"live"`
+    | `"in_progress"`, shown as a small colored dot per item (green
+    `bg-sea-deep` for live — reusing the palette doc's existing
+    "live-status dot" token — amber `bg-chartreuse` for in progress,
+    which fits the design system's "chartreuse only for rare, tiny
+    accents" rule since a single status dot is exactly that). Storage:
+    `sections.building`.
+  - **None of the three have an item cap** — genuinely unlimited. Both
+    display components show only the first 3 items inline and add a
+    "View all N" button once there are more, which opens the shared
+    `components/dashboard/modal.tsx` shell listing every item in a
+    scrollable list (same row markup as the inline version). This is a
+    different pattern from Current Focus/Workspace Gear, which are
+    capped lists with no overflow modal — use the capped-list pattern
+    only when a hard limit actually makes sense, and this
+    show-3-then-"View all" pattern for anything unbounded.
+  - **No icon upload, no icon picker.** Every item's logo is
+    auto-fetched via Clearbit's public logo API
+    (`https://logo.clearbit.com/{domain}`, no key required) — see
+    `lib/logo.ts` (`domainFromUrl`/`clearbitLogoUrl`) and
+    `components/item-logo.tsx` (a small client component that renders
+    the `<img>`, and on `onError` — e.g. a 404 from Clearbit, or no URL
+    at all — falls back to a monogram in the same visual style as the
+    avatar fallback elsewhere). **This is the pattern to reuse for
+    Partner Shelf** (and anything else that's fundamentally "a list of
+    external links/tools/companies") instead of adding another upload
+    field or icon picker.
+  - Same empty-state rule as Mission/Current Focus/Workspace: all
+    three always render on the dashboard (with a pencil-button entry
+    point, even with zero items), but each only renders on the public
+    page when it has at least one item. Since the public page can have
+    any subset of the three present, the column span is computed at
+    runtime (12/6/4 for 1/2/3 visible cards) the same way the
+    Mission/Workspace row already does it.
 
 **In progress / next up:**
-- Everything else from the bento grid mockup (Tools of the Trade,
-  Building, AI Workspace, Partner Shelf, Playlist, Currently Reading) —
-  none of these have modals or schema yet. Follow the same
-  3-layer-constraint + modal + draft/publish pattern established for
-  the header fields, and reuse the `lib/sections.ts` block-array
-  pattern for anything list-shaped.
+- Partner Shelf, Playlist, Currently Reading — none of these have
+  modals or schema yet. Follow the same 3-layer-constraint + modal +
+  draft/publish pattern established for the header fields, and reuse
+  the `lib/sections.ts` block-array pattern (and, if relevant, the
+  Clearbit logo pattern above) for anything list-shaped.
 - Dark mode toggle (deferred on purpose — see Design System section
   above; foundation is ready, just needs the toggle UI + `dark` class
   wiring in `app/layout.tsx`).

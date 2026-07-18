@@ -8,7 +8,42 @@ export interface WorkspaceGearSection {
   items: string[];
 }
 
-export type SectionBlock = CurrentFocusSection | WorkspaceGearSection;
+/** Shared item shape for Productivity Stack and AI Workspace — name + an optional link. */
+export interface StackItem {
+  name: string;
+  url: string | null;
+}
+
+export interface ProductivityStackSection {
+  type: "productivity_stack";
+  items: StackItem[];
+}
+
+export interface AiWorkspaceSection {
+  type: "ai_workspace";
+  items: StackItem[];
+}
+
+export type BuildingStatus = "live" | "in_progress";
+
+export interface BuildingItem {
+  name: string;
+  url: string | null;
+  description: string | null;
+  status: BuildingStatus;
+}
+
+export interface BuildingSection {
+  type: "building";
+  items: BuildingItem[];
+}
+
+export type SectionBlock =
+  | CurrentFocusSection
+  | WorkspaceGearSection
+  | ProductivityStackSection
+  | AiWorkspaceSection
+  | BuildingSection;
 
 export const CURRENT_FOCUS_MAX_ITEMS = 6;
 export const WORKSPACE_GEAR_MAX_ITEMS = 12;
@@ -22,9 +57,10 @@ export function getSection<T extends SectionBlock["type"]>(
     | undefined;
 }
 
+/** For the two plain-string-list blocks only — Current Focus and Workspace Gear. */
 export function getSectionItems(
   sections: SectionBlock[] | null | undefined,
-  type: SectionBlock["type"]
+  type: "current_focus" | "workspace_gear"
 ): string[] {
   return getSection(sections, type)?.items ?? [];
 }

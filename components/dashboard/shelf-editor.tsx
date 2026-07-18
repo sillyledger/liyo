@@ -6,8 +6,13 @@ import { createClient } from "@/lib/supabase/client";
 import { EditProfileModal } from "./edit-profile-modal";
 import { EditMissionModal } from "./edit-mission-modal";
 import { EditWorkspaceModal } from "./edit-workspace-modal";
-import { getSectionItems, sectionsMatch, type SectionBlock } from "@/lib/sections";
+import { EditStackModal } from "./edit-stack-modal";
+import { EditBuildingModal } from "./edit-building-modal";
+import { getSection, getSectionItems, sectionsMatch, type SectionBlock } from "@/lib/sections";
 import { WorkspaceIllustration } from "@/components/workspace-illustration";
+import { StackCard } from "@/components/stack-card";
+import { BuildingCard } from "@/components/building-card";
+import { CARD_TAG } from "@/lib/styles";
 
 interface ProfileFields {
   name: string | null;
@@ -41,8 +46,6 @@ function fieldsMatch(a: ProfileFields, b: ProfileFields | null) {
   );
 }
 
-const CARD_TAG = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-2";
-
 function CardEditButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button
@@ -68,6 +71,9 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   const [showEdit, setShowEdit] = useState(false);
   const [showEditMission, setShowEditMission] = useState(false);
   const [showEditWorkspace, setShowEditWorkspace] = useState(false);
+  const [showEditProductivityStack, setShowEditProductivityStack] = useState(false);
+  const [showEditAiWorkspace, setShowEditAiWorkspace] = useState(false);
+  const [showEditBuilding, setShowEditBuilding] = useState(false);
   const [publishStatus, setPublishStatus] = useState<"idle" | "publishing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -123,6 +129,9 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   const initial = (draft.name || username).charAt(0).toUpperCase();
   const currentFocusItems = getSectionItems(draft.sections, "current_focus");
   const gearItems = getSectionItems(draft.sections, "workspace_gear");
+  const productivityItems = getSection(draft.sections, "productivity_stack")?.items ?? [];
+  const aiWorkspaceItems = getSection(draft.sections, "ai_workspace")?.items ?? [];
+  const buildingItems = getSection(draft.sections, "building")?.items ?? [];
 
   return (
     <div className="w-full">
@@ -237,6 +246,33 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
           </div>
         </div>
 
+        {/* Productivity Stack, AI Workspace, Building — always render on the
+            dashboard (owner-only), each an equal third (4/12) so Building
+            lines up under Workspace above it. */}
+        <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
+          <StackCard
+            label="Productivity Stack"
+            items={productivityItems}
+            colSpanClassName="sm:col-span-4"
+            editButton={
+              <CardEditButton onClick={() => setShowEditProductivityStack(true)} label="Edit productivity stack" />
+            }
+          />
+          <StackCard
+            label="AI Workspace"
+            items={aiWorkspaceItems}
+            colSpanClassName="sm:col-span-4"
+            editButton={
+              <CardEditButton onClick={() => setShowEditAiWorkspace(true)} label="Edit AI workspace" />
+            }
+          />
+          <BuildingCard
+            items={buildingItems}
+            colSpanClassName="sm:col-span-4"
+            editButton={<CardEditButton onClick={() => setShowEditBuilding(true)} label="Edit building" />}
+          />
+        </div>
+
         <div className="mt-4 flex w-full items-center justify-between rounded-[14px] border border-line bg-surface px-5 py-4">
           <div>
             <p className="text-[13.5px] font-medium text-fg">
@@ -283,6 +319,33 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
           userId={userId}
           initial={{ sections: draft.sections }}
           onClose={() => setShowEditWorkspace(false)}
+        />
+      )}
+      {showEditProductivityStack && (
+        <EditStackModal
+          userId={userId}
+          sectionType="productivity_stack"
+          title="Edit productivity stack"
+          namePlaceholder="Tool name"
+          initial={{ sections: draft.sections }}
+          onClose={() => setShowEditProductivityStack(false)}
+        />
+      )}
+      {showEditAiWorkspace && (
+        <EditStackModal
+          userId={userId}
+          sectionType="ai_workspace"
+          title="Edit AI workspace"
+          namePlaceholder="Tool name"
+          initial={{ sections: draft.sections }}
+          onClose={() => setShowEditAiWorkspace(false)}
+        />
+      )}
+      {showEditBuilding && (
+        <EditBuildingModal
+          userId={userId}
+          initial={{ sections: draft.sections }}
+          onClose={() => setShowEditBuilding(false)}
         />
       )}
     </div>

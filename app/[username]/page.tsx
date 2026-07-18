@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getSectionItems } from "@/lib/sections";
+import { getSection, getSectionItems } from "@/lib/sections";
 import { WorkspaceIllustration } from "@/components/workspace-illustration";
-
-const CARD_TAG = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-2";
+import { StackCard } from "@/components/stack-card";
+import { BuildingCard } from "@/components/building-card";
+import { CARD_TAG } from "@/lib/styles";
 
 interface ProfilePageProps {
   params: { username: string };
@@ -41,9 +42,27 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const gearItems = getSectionItems(profile.sections, "workspace_gear");
   const hasMissionContent = Boolean(profile.mission) || currentFocusItems.length > 0;
   const hasWorkspaceContent = gearItems.length > 0;
-  const hasNothingElse = !hasMissionContent && !hasWorkspaceContent;
   const missionColSpan = hasWorkspaceContent ? "sm:col-span-8" : "sm:col-span-12";
   const workspaceColSpan = hasMissionContent ? "sm:col-span-4" : "sm:col-span-12";
+
+  const productivityItems = getSection(profile.sections, "productivity_stack")?.items ?? [];
+  const aiWorkspaceItems = getSection(profile.sections, "ai_workspace")?.items ?? [];
+  const buildingItems = getSection(profile.sections, "building")?.items ?? [];
+  const hasProductivityContent = productivityItems.length > 0;
+  const hasAiWorkspaceContent = aiWorkspaceItems.length > 0;
+  const hasBuildingContent = buildingItems.length > 0;
+  const visibleStackCardCount = [hasProductivityContent, hasAiWorkspaceContent, hasBuildingContent].filter(
+    Boolean
+  ).length;
+  const stackColSpan =
+    visibleStackCardCount === 1 ? "sm:col-span-12" : visibleStackCardCount === 2 ? "sm:col-span-6" : "sm:col-span-4";
+
+  const hasNothingElse =
+    !hasMissionContent &&
+    !hasWorkspaceContent &&
+    !hasProductivityContent &&
+    !hasAiWorkspaceContent &&
+    !hasBuildingContent;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[1180px] flex-col px-6 py-16">
@@ -144,6 +163,18 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {visibleStackCardCount > 0 && (
+        <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
+          {hasProductivityContent && (
+            <StackCard label="Productivity Stack" items={productivityItems} colSpanClassName={stackColSpan} />
+          )}
+          {hasAiWorkspaceContent && (
+            <StackCard label="AI Workspace" items={aiWorkspaceItems} colSpanClassName={stackColSpan} />
+          )}
+          {hasBuildingContent && <BuildingCard items={buildingItems} colSpanClassName={stackColSpan} />}
         </div>
       )}
 
