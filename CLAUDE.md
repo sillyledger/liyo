@@ -320,17 +320,20 @@ assuming the reported line is where the real problem is.
     capped lists with no overflow modal — use the capped-list pattern
     only when a hard limit actually makes sense, and this
     show-3-then-"View all" pattern for anything unbounded.
-  - **No icon upload, no icon picker.** Every item's logo is
-    auto-fetched via Clearbit's public logo API
-    (`https://logo.clearbit.com/{domain}`, no key required) — see
-    `lib/logo.ts` (`domainFromUrl`/`clearbitLogoUrl`) and
-    `components/item-logo.tsx` (a small client component that renders
-    the `<img>`, and on `onError` — e.g. a 404 from Clearbit, or no URL
+  - **No icon upload, no icon picker.** Every item's icon is
+    auto-fetched via Google's public favicon service
+    (`https://www.google.com/s2/favicons?domain={domain}&sz=128`, no
+    key required) — see `lib/logo.ts` (`domainFromUrl`/
+    `googleFaviconUrl`) and `components/item-logo.tsx` (a small client
+    component that renders the `<img>`, and on `onError` — or no URL
     at all — falls back to a monogram in the same visual style as the
     avatar fallback elsewhere). **This is the pattern to reuse for
     Partner Shelf** (and anything else that's fundamentally "a list of
     external links/tools/companies") instead of adding another upload
-    field or icon picker.
+    field or icon picker. **Do not use Clearbit's logo API for this or
+    any future block** — `logo.clearbit.com` was shut down permanently
+    on 2025-12-08, which is why this was switched to Google's favicon
+    service.
   - Same empty-state rule as Mission/Current Focus/Workspace: all
     three always render on the dashboard (with a pencil-button entry
     point, even with zero items), but each only renders on the public
@@ -344,7 +347,7 @@ assuming the reported line is where the real problem is.
   modals or schema yet. Follow the same 3-layer-constraint + modal +
   draft/publish pattern established for the header fields, and reuse
   the `lib/sections.ts` block-array pattern (and, if relevant, the
-  Clearbit logo pattern above) for anything list-shaped.
+  Google-favicon icon pattern above) for anything list-shaped.
 - Dark mode toggle (deferred on purpose — see Design System section
   above; foundation is ready, just needs the toggle UI + `dark` class
   wiring in `app/layout.tsx`).

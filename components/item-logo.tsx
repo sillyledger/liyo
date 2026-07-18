@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { clearbitLogoUrl } from "@/lib/logo";
+import { googleFaviconUrl } from "@/lib/logo";
 
 interface ItemLogoProps {
   name: string;
@@ -10,13 +10,13 @@ interface ItemLogoProps {
 }
 
 /**
- * Auto-fetched logo via Clearbit's public logo API, falling back to a
+ * Auto-fetched icon via Google's public favicon service, falling back to a
  * monogram (same visual pattern as the avatar fallback) when there's no
- * URL to derive a domain from, or the logo fails to load (e.g. a 404).
+ * URL to derive a domain from, or the request fails to load.
  */
 export function ItemLogo({ name, url, className = "h-9 w-9" }: ItemLogoProps) {
   const [failed, setFailed] = useState(false);
-  const logoUrl = clearbitLogoUrl(url);
+  const logoUrl = googleFaviconUrl(url);
   const initial = (name || "?").charAt(0).toUpperCase();
 
   if (!logoUrl || failed) {

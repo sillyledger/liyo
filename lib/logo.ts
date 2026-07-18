@@ -13,8 +13,12 @@ export function domainFromUrl(url: string | null | undefined): string | null {
   }
 }
 
-/** Clearbit's public logo API — no API key required. Callers must still handle a 404/failed load. */
-export function clearbitLogoUrl(url: string | null | undefined): string | null {
+/**
+ * Google's public favicon service — no API key required. (Clearbit's logo API,
+ * used here previously, was shut down permanently on 2025-12-08.) Callers
+ * must still handle a failed/empty load.
+ */
+export function googleFaviconUrl(url: string | null | undefined): string | null {
   const domain = domainFromUrl(url);
-  return domain ? `https://logo.clearbit.com/${domain}` : null;
+  return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : null;
 }
