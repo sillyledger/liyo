@@ -187,7 +187,8 @@ assuming the reported line is where the real problem is.
   words + min length
 - Public profile route (`app/[username]/page.tsx`) — shows avatar, name,
   bio, location, website (as a clickable link), and a "still being
-  built" placeholder card when `sections` is empty
+  built" placeholder card when none of the built-out blocks (Mission &
+  Current Focus, Workspace) have content
 - Dashboard shell + sidebar (`components/dashboard/dashboard-shell.tsx`,
   `sidebar.tsx`) — currently just logo + "Home," built to extend with
   more nav sections later
@@ -203,6 +204,37 @@ assuming the reported line is where the real problem is.
   both `shelf-editor.tsx` (dashboard) and `app/[username]/page.tsx`
   (public), only shown when a quote is set; `app/dashboard/page.tsx`
   fetches/passes the column alongside the other header fields
+- **`sections jsonb` is now in use**, via `lib/sections.ts`: it holds an
+  array of typed blocks (`{ type, ...fields }`), e.g.
+  `{ type: "current_focus", items: string[] }` and
+  `{ type: "workspace_gear", items: string[] }`. `getSection`/
+  `getSectionItems` read a block by type; `upsertSection` replaces just
+  that one block's entry while leaving every other block in the array
+  untouched — this is the pattern future blocks (Building, AI
+  Workspace, Partner Shelf, Playlist, Currently Reading) should reuse
+  rather than inventing per-block storage.
+- Mission & Current Focus card — one card, two columns. `mission` is a
+  real column (`profiles.mission` / `profile_drafts.mission`, 400-char
+  cap enforced by a DB check constraint added by hand, per this
+  project's usual 3-layer-limit pattern). Current Focus is a capped list (max 6, `CURRENT_FOCUS_MAX_ITEMS` in
+  `lib/sections.ts`) of individually editable/removable text rows via
+  the shared `EditableItemList` component
+  (`components/dashboard/editable-item-list.tsx`). Edited through
+  `edit-mission-modal.tsx`. Rendered with a checkmark-style checklist.
+- Workspace card — no photo upload; the "photo" area is a deterministic
+  abstract gradient from `lib/workspace-gradient.ts` (hashes a seed —
+  currently the username — into one of a few palette-token gradient
+  pairs, so the same person always sees the same gradient). The city
+  badge reuses the existing `location` field, not a new column. Gear is
+  a capped list (max 12, `WORKSPACE_GEAR_MAX_ITEMS`) rendered 2-column,
+  edited through `edit-workspace-modal.tsx` via the same
+  `EditableItemList`.
+- Both new cards always render on the dashboard (owner-only), even
+  empty, so there's a pencil-button entry point to fill them in for the
+  first time — the "only show a card if it has content" rule from
+  `CLAUDE.md`'s design intent applies to the **public** page
+  (`app/[username]/page.tsx`), which hides each card until it has real
+  content, same as bio/quote already do.
 
 **In progress / next up:**
 - Everything else from the bento grid mockup (Mission/Current Focus,

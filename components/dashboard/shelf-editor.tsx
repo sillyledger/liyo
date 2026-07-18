@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { EditProfileModal } from "./edit-profile-modal";
+import { EditMissionModal } from "./edit-mission-modal";
+import { EditWorkspaceModal } from "./edit-workspace-modal";
+import { getSectionItems, sectionsMatch, type SectionBlock } from "@/lib/sections";
+import { workspaceGradient } from "@/lib/workspace-gradient";
 
 interface ProfileFields {
   name: string | null;
@@ -12,6 +16,8 @@ interface ProfileFields {
   website: string | null;
   avatar_url: string | null;
   quote: string | null;
+  mission: string | null;
+  sections: SectionBlock[];
 }
 
 interface ShelfEditorProps {
@@ -29,13 +35,39 @@ function fieldsMatch(a: ProfileFields, b: ProfileFields | null) {
     a.location === b.location &&
     a.website === b.website &&
     a.avatar_url === b.avatar_url &&
-    a.quote === b.quote
+    a.quote === b.quote &&
+    a.mission === b.mission &&
+    sectionsMatch(a.sections, b.sections)
+  );
+}
+
+const CARD_TAG = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-2";
+
+function CardEditButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-fg"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 20l4-1 11-11-3-3L5 16l-1 4Z"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
   );
 }
 
 export function ShelfEditor({ userId, username, draft, published }: ShelfEditorProps) {
   const router = useRouter();
   const [showEdit, setShowEdit] = useState(false);
+  const [showEditMission, setShowEditMission] = useState(false);
+  const [showEditWorkspace, setShowEditWorkspace] = useState(false);
   const [publishStatus, setPublishStatus] = useState<"idle" | "publishing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -58,6 +90,8 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
         website: draft.website,
         avatar_url: draft.avatar_url,
         quote: draft.quote,
+        mission: draft.mission,
+        sections: draft.sections,
         published_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -87,6 +121,9 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   }
 
   const initial = (draft.name || username).charAt(0).toUpperCase();
+  const currentFocusItems = getSectionItems(draft.sections, "current_focus");
+  const gearItems = getSectionItems(draft.sections, "workspace_gear");
+  const gradient = workspaceGradient(username);
 
   return (
     <div className="w-full">
@@ -142,6 +179,64 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
           )}
         </div>
 
+        {/* These two cards always render on the dashboard (owner-only) so there's
+            an edit-pencil entry point before any content exists; the public
+            profile hides them entirely until they have content. */}
+        <div className="relative mt-4 w-full rounded-[16px] border border-line bg-surface p-6">
+          <CardEditButton onClick={() => setShowEditMission(true)} label="Edit mission & current focus" />
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <span className={CARD_TAG}>Mission</span>
+              <p className="mt-2 text-[14px] leading-[1.6] text-muted">
+                {draft.mission || <span className="italic text-muted-2">No mission yet.</span>}
+              </p>
+            </div>
+            <div>
+              <span className={CARD_TAG}>Current focus</span>
+              {currentFocusItems.length > 0 ? (
+                <ul className="mt-2 flex flex-col gap-2">
+                  {currentFocusItems.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[13.5px] text-fg">
+                      <span className="mt-[3px] flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center rounded-full bg-sea text-[10px] text-slate">
+                        &#10003;
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-[13.5px] italic text-muted-2">No items yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="relative mt-4 w-full rounded-[16px] border border-line bg-surface p-6">
+          <CardEditButton onClick={() => setShowEditWorkspace(true)} label="Edit workspace" />
+          <div
+            className="relative h-[88px] w-full overflow-hidden rounded-[12px]"
+            style={{ backgroundImage: gradient.backgroundImage }}
+          >
+            {draft.location && (
+              <span className="absolute right-3 top-3 rounded-full bg-slate/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-oatmeal backdrop-blur-sm">
+                {draft.location}
+              </span>
+            )}
+          </div>
+          <span className={`${CARD_TAG} mt-4 block`}>Workspace</span>
+          {gearItems.length > 0 ? (
+            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+              {gearItems.map((item, i) => (
+                <span key={i} className="text-[13px] text-muted">
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-[13px] italic text-muted-2">No gear added yet.</p>
+          )}
+        </div>
+
         <div className="mt-4 flex w-full items-center justify-between rounded-[14px] border border-line bg-surface px-5 py-4">
           <div>
             <p className="text-[13.5px] font-medium text-fg">
@@ -174,6 +269,20 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
           userId={userId}
           initial={draft}
           onClose={() => setShowEdit(false)}
+        />
+      )}
+      {showEditMission && (
+        <EditMissionModal
+          userId={userId}
+          initial={{ mission: draft.mission, sections: draft.sections }}
+          onClose={() => setShowEditMission(false)}
+        />
+      )}
+      {showEditWorkspace && (
+        <EditWorkspaceModal
+          userId={userId}
+          initial={{ sections: draft.sections }}
+          onClose={() => setShowEditWorkspace(false)}
         />
       )}
     </div>
