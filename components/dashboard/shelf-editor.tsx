@@ -7,7 +7,7 @@ import { EditProfileModal } from "./edit-profile-modal";
 import { EditMissionModal } from "./edit-mission-modal";
 import { EditWorkspaceModal } from "./edit-workspace-modal";
 import { getSectionItems, sectionsMatch, type SectionBlock } from "@/lib/sections";
-import { workspaceGradient } from "@/lib/workspace-gradient";
+import { WorkspaceIllustration } from "@/components/workspace-illustration";
 
 interface ProfileFields {
   name: string | null;
@@ -123,7 +123,6 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   const initial = (draft.name || username).charAt(0).toUpperCase();
   const currentFocusItems = getSectionItems(draft.sections, "current_focus");
   const gearItems = getSectionItems(draft.sections, "workspace_gear");
-  const gradient = workspaceGradient(username);
 
   return (
     <div className="w-full">
@@ -215,10 +214,8 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
 
           <div className="relative w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:w-[240px]">
             <CardEditButton onClick={() => setShowEditWorkspace(true)} label="Edit workspace" />
-            <div
-              className="relative h-[88px] w-full overflow-hidden rounded-[12px]"
-              style={{ backgroundImage: gradient.backgroundImage }}
-            >
+            <div className="relative h-[88px] w-full overflow-hidden rounded-[12px]">
+              <WorkspaceIllustration className="h-full w-full" />
               {draft.location && (
                 <span className="absolute right-3 top-3 rounded-full bg-slate/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-oatmeal backdrop-blur-sm">
                   {draft.location}

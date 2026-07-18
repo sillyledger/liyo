@@ -221,14 +221,22 @@ assuming the reported line is where the real problem is.
   the shared `EditableItemList` component
   (`components/dashboard/editable-item-list.tsx`). Edited through
   `edit-mission-modal.tsx`. Rendered with a checkmark-style checklist.
-- Workspace card — no photo upload; the "photo" area is a deterministic
-  abstract gradient from `lib/workspace-gradient.ts` (hashes a seed —
-  currently the username — into one of a few palette-token gradient
-  pairs, so the same person always sees the same gradient). The city
-  badge reuses the existing `location` field, not a new column. Gear is
-  a capped list (max 12, `WORKSPACE_GEAR_MAX_ITEMS`) rendered 2-column,
-  edited through `edit-workspace-modal.tsx` via the same
-  `EditableItemList`.
+- Workspace card — no photo upload; the "photo" area is a **fixed**
+  isometric desk illustration (`components/workspace-illustration.tsx`
+  — desk, monitor, mug, plant), plain inline SVG using the `fill-sea`/
+  `fill-sea-deep`/`fill-umber`/`fill-umber-deep`/`fill-umber-light`
+  Tailwind color utilities (Tailwind's `fill-*`/`stroke-*` core
+  plugins read straight from `theme.colors`, so any palette token
+  already works as a `fill-`/`stroke-` class with no extra config).
+  **Identical for every user — not seeded or generated.** An earlier
+  version generated a per-user deterministic gradient
+  (`lib/workspace-gradient.ts`, hash-of-username → palette pair); that
+  file was deleted and the approach abandoned in favor of one fixed
+  asset, so don't reintroduce per-user generation here without reason.
+  The city badge reuses the existing `location` field, not a new
+  column. Gear is a capped list (max 12, `WORKSPACE_GEAR_MAX_ITEMS`)
+  rendered 2-column, edited through `edit-workspace-modal.tsx` via the
+  same `EditableItemList`.
 - Both new cards always render on the dashboard (owner-only), even
   empty, so there's a pencil-button entry point to fill them in for the
   first time — the "only show a card if it has content" rule from
@@ -243,11 +251,13 @@ assuming the reported line is where the real problem is.
   future side-by-side card rows:
   - Any per-card edit-pencil button (`CardEditButton`, absolutely
     positioned) needs an explicit `z-10`. A card's own inner content
-    (like the Workspace gradient box) is often `position: relative`
-    too — CSS stacks same-z-index positioned siblings in DOM order, so
-    without an explicit z-index the later-in-DOM inner content can
-    paint over an earlier absolutely-positioned button and make it
-    unclickable, even though it visually looks like it's "on top."
+    (e.g. the Workspace illustration's wrapper div, which is
+    `position: relative` so the location badge can sit inside it) is
+    often `position: relative` too — CSS stacks same-z-index positioned
+    siblings in DOM order, so without an explicit z-index the
+    later-in-DOM inner content can paint over an earlier
+    absolutely-positioned button and make it unclickable, even though
+    it visually looks like it's "on top."
   - Each card in the row needs its own `w-full` + either `flex-1`
     (grows) or `flex-shrink-0` + a fixed width (stays narrow) — giving
     both cards plain `w-full` with no flex sizing collapses them back

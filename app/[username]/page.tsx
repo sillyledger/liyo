@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSectionItems } from "@/lib/sections";
-import { workspaceGradient } from "@/lib/workspace-gradient";
+import { WorkspaceIllustration } from "@/components/workspace-illustration";
 
 const CARD_TAG = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-2";
 
@@ -42,7 +42,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const hasMissionContent = Boolean(profile.mission) || currentFocusItems.length > 0;
   const hasWorkspaceContent = gearItems.length > 0;
   const hasNothingElse = !hasMissionContent && !hasWorkspaceContent;
-  const gradient = workspaceGradient(profile.username);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[760px] flex-col px-6 py-16">
@@ -125,10 +124,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
           {hasWorkspaceContent && (
             <div className="w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:w-[240px]">
-              <div
-                className="relative h-[88px] w-full overflow-hidden rounded-[12px]"
-                style={{ backgroundImage: gradient.backgroundImage }}
-              >
+              <div className="relative h-[88px] w-full overflow-hidden rounded-[12px]">
+                <WorkspaceIllustration className="h-full w-full" />
                 {profile.location && (
                   <span className="absolute right-3 top-3 rounded-full bg-slate/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-oatmeal backdrop-blur-sm">
                     {profile.location}
