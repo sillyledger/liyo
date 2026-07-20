@@ -4,6 +4,8 @@ import { getSection, getSectionItems } from "@/lib/sections";
 import { WorkspaceIllustration } from "@/components/workspace-illustration";
 import { StackCard } from "@/components/stack-card";
 import { BuildingCard } from "@/components/building-card";
+import { PlaylistCard } from "@/components/playlist-card";
+import { CurrentlyReadingCard } from "@/components/currently-reading-card";
 import { CARD_TAG } from "@/lib/styles";
 
 interface ProfilePageProps {
@@ -29,7 +31,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const supabase = createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, name, bio, location, website, avatar_url, quote, mission, sections")
+    .select("username, name, bio, location, website, avatar_url, quote, mission, playlist_url, sections")
     .eq("username", params.username)
     .maybeSingle();
 
@@ -57,12 +59,26 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const stackColSpan =
     visibleStackCardCount === 1 ? "sm:col-span-12" : visibleStackCardCount === 2 ? "sm:col-span-6" : "sm:col-span-4";
 
+  const starterStackItems = getSection(profile.sections, "preferred_starter_stack")?.items ?? [];
+  const currentlyReadingItems = getSection(profile.sections, "currently_reading")?.items ?? [];
+  const hasStarterStackContent = starterStackItems.length > 0;
+  const hasPlaylistContent = Boolean(profile.playlist_url);
+  const hasCurrentlyReadingContent = currentlyReadingItems.length > 0;
+  const visibleSecondRowCount = [hasStarterStackContent, hasPlaylistContent, hasCurrentlyReadingContent].filter(
+    Boolean
+  ).length;
+  const secondRowColSpan =
+    visibleSecondRowCount === 1 ? "sm:col-span-12" : visibleSecondRowCount === 2 ? "sm:col-span-6" : "sm:col-span-4";
+
   const hasNothingElse =
     !hasMissionContent &&
     !hasWorkspaceContent &&
     !hasProductivityContent &&
     !hasAiWorkspaceContent &&
-    !hasBuildingContent;
+    !hasBuildingContent &&
+    !hasStarterStackContent &&
+    !hasPlaylistContent &&
+    !hasCurrentlyReadingContent;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[1180px] flex-col px-6 py-16">
@@ -175,6 +191,20 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <StackCard label="AI Workspace" items={aiWorkspaceItems} colSpanClassName={stackColSpan} />
           )}
           {hasBuildingContent && <BuildingCard items={buildingItems} colSpanClassName={stackColSpan} />}
+        </div>
+      )}
+
+      {visibleSecondRowCount > 0 && (
+        <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
+          {hasStarterStackContent && (
+            <StackCard label="Preferred Starter Stack" items={starterStackItems} colSpanClassName={secondRowColSpan} />
+          )}
+          {hasPlaylistContent && (
+            <PlaylistCard playlistUrl={profile.playlist_url} colSpanClassName={secondRowColSpan} />
+          )}
+          {hasCurrentlyReadingContent && (
+            <CurrentlyReadingCard items={currentlyReadingItems} colSpanClassName={secondRowColSpan} />
+          )}
         </div>
       )}
 

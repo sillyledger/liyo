@@ -327,13 +327,12 @@ assuming the reported line is where the real problem is.
     `googleFaviconUrl`) and `components/item-logo.tsx` (a small client
     component that renders the `<img>`, and on `onError` — or no URL
     at all — falls back to a monogram in the same visual style as the
-    avatar fallback elsewhere). **This is the pattern to reuse for
-    Partner Shelf** (and anything else that's fundamentally "a list of
-    external links/tools/companies") instead of adding another upload
-    field or icon picker. **Do not use Clearbit's logo API for this or
-    any future block** — `logo.clearbit.com` was shut down permanently
-    on 2025-12-08, which is why this was switched to Google's favicon
-    service.
+    avatar fallback elsewhere). **This is the pattern to reuse** for
+    anything that's fundamentally "a list of external links/tools/
+    companies" instead of adding another upload field or icon picker.
+    **Do not use Clearbit's logo API for this or any future block** —
+    `logo.clearbit.com` was shut down permanently on 2025-12-08, which
+    is why this was switched to Google's favicon service.
   - Same empty-state rule as Mission/Current Focus/Workspace: all
     three always render on the dashboard (with a pencil-button entry
     point, even with zero items), but each only renders on the public
@@ -341,13 +340,64 @@ assuming the reported line is where the real problem is.
     any subset of the three present, the column span is computed at
     runtime (12/6/4 for 1/2/3 visible cards) the same way the
     Mission/Workspace row already does it.
+- **Preferred Starter Stack, Playlist for Work, and Currently
+  Reading** — the row below Productivity Stack/AI Workspace/Building,
+  same equal-thirds (`sm:col-span-4`) treatment, same order left to
+  right, same always-on-dashboard/content-gated-on-public empty-state
+  rule, same runtime 12/6/4 column-span calc for whichever subset is
+  present on the public page.
+  - **Preferred Starter Stack** was renamed from the mockup/roadmap's
+    "Partner Shelf" before any code for it existed — there was nothing
+    to migrate, just don't reintroduce the old name. Framing: the
+    boilerplate/default toolkit a dev reaches for on a new project
+    (e.g. Vercel + Supabase + Clerk + Tailwind), distinct from
+    Productivity Stack (daily tools) and AI Workspace (AI models).
+    Identical shape and behavior to those two (`{ name, url }`,
+    Google-favicon icon, unlimited items, 3-inline + "View all") —
+    it reuses `EditStackModal`/`StackCard` unmodified, just a third
+    `sectionType` value (`"preferred_starter_stack"`) alongside
+    `"productivity_stack"` / `"ai_workspace"`. Storage:
+    `sections.preferred_starter_stack`.
+  - **Playlist for Work** is a single Spotify playlist link, not a
+    repeating list — the one exception to this row's shape. Stored as
+    a dedicated nullable `playlist_url` column on both `profiles` and
+    `profile_drafts` (not `sections`), since it's one scalar field, not
+    an array of items. **The column migration was not run by Claude
+    Code and still needs to be applied by hand** in the Supabase SQL
+    editor:
+    ```sql
+    alter table profiles add column playlist_url text;
+    alter table profile_drafts add column playlist_url text;
+    ```
+    The edit modal (`edit-playlist-modal.tsx`) does light validation
+    that a pasted URL matches Spotify's playlist link shape and extracts
+    the playlist ID (`lib/spotify.ts`, `extractSpotifyPlaylistId`/
+    `spotifyEmbedUrl`); rendering (`components/playlist-card.tsx`, both
+    dashboard and public) is just Spotify's own embed iframe
+    (`https://open.spotify.com/embed/playlist/{id}`) — no manual track
+    entry, no track data stored or synced on our side at all.
+  - **Currently Reading** is title + author (no ISBN from the user),
+    stored as `sections.currently_reading`, same unlimited/3-inline/
+    "View all" pattern as Building etc. Covers use a **two-step Open
+    Library lookup** (`lib/openlibrary.ts`, `findBookCoverUrl`): search
+    `openlibrary.org/search.json?title=&author=` for a matching
+    edition, then build the cover image URL from that edition's
+    `cover_i` (`covers.openlibrary.org/b/id/{cover_id}-M.jpg`). No
+    cover match falls back to a plain coral-toned monogram placeholder
+    (`components/currently-reading-card.tsx`), same visual idea as the
+    avatar/logo monogram fallbacks elsewhere — never a broken image.
+    **This lookup runs through a server route, `app/api/book-cover/
+    route.ts`**, rather than being called directly from the edit
+    modal's client component — Open Library asks integrations to send
+    an identifying `User-Agent` header on regular-use requests, and
+    browsers refuse to let `fetch()` set `User-Agent` from client-side
+    JS, so the request has to be proxied server-side regardless. The
+    modal calls this route on blur of the title/author inputs (not on
+    every keystroke) and stores whatever cover URL comes back on the
+    item itself. **This same lookup pattern is the one to reuse** if a
+    future block ever needs other book-like/edition-shaped data.
 
 **In progress / next up:**
-- Partner Shelf, Playlist, Currently Reading — none of these have
-  modals or schema yet. Follow the same 3-layer-constraint + modal +
-  draft/publish pattern established for the header fields, and reuse
-  the `lib/sections.ts` block-array pattern (and, if relevant, the
-  Google-favicon icon pattern above) for anything list-shaped.
 - Dark mode toggle (deferred on purpose — see Design System section
   above; foundation is ready, just needs the toggle UI + `dark` class
   wiring in `app/layout.tsx`).

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Modal } from "./modal";
 import { getSection, upsertSection, type SectionBlock, type StackItem } from "@/lib/sections";
 
-type StackSectionType = "productivity_stack" | "ai_workspace";
+type StackSectionType = "productivity_stack" | "ai_workspace" | "preferred_starter_stack";
 
 interface EditStackModalProps {
   userId: string;
@@ -22,7 +22,7 @@ interface EditStackModalProps {
 const inputClass =
   "w-full rounded-[9px] border border-line-2 bg-bg px-3 py-[8px] text-[13.5px] text-fg outline-none focus:border-accent";
 
-/** Shared editor for Productivity Stack and AI Workspace — identical item shape, no cap on count. */
+/** Shared editor for Productivity Stack, AI Workspace, and Preferred Starter Stack — identical item shape, no cap on count. */
 export function EditStackModal({
   userId,
   sectionType,

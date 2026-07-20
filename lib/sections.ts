@@ -38,12 +38,32 @@ export interface BuildingSection {
   items: BuildingItem[];
 }
 
+/** Same shape as Productivity Stack / AI Workspace — the boilerplate/default toolkit a dev reaches for on a new project. */
+export interface PreferredStarterStackSection {
+  type: "preferred_starter_stack";
+  items: StackItem[];
+}
+
+export interface CurrentlyReadingItem {
+  title: string;
+  author: string;
+  /** Resolved via the Open Library title/author lookup; null falls back to a placeholder cover. */
+  cover_url: string | null;
+}
+
+export interface CurrentlyReadingSection {
+  type: "currently_reading";
+  items: CurrentlyReadingItem[];
+}
+
 export type SectionBlock =
   | CurrentFocusSection
   | WorkspaceGearSection
   | ProductivityStackSection
   | AiWorkspaceSection
-  | BuildingSection;
+  | BuildingSection
+  | PreferredStarterStackSection
+  | CurrentlyReadingSection;
 
 export const CURRENT_FOCUS_MAX_ITEMS = 6;
 export const WORKSPACE_GEAR_MAX_ITEMS = 12;
