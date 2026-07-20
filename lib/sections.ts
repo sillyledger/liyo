@@ -1,8 +1,3 @@
-export interface CurrentFocusSection {
-  type: "current_focus";
-  items: string[];
-}
-
 export interface WorkspaceGearSection {
   type: "workspace_gear";
   items: string[];
@@ -44,28 +39,13 @@ export interface PreferredStarterStackSection {
   items: StackItem[];
 }
 
-export interface CurrentlyReadingItem {
-  title: string;
-  author: string;
-  /** Resolved via the Open Library title/author lookup; null falls back to a placeholder cover. */
-  cover_url: string | null;
-}
-
-export interface CurrentlyReadingSection {
-  type: "currently_reading";
-  items: CurrentlyReadingItem[];
-}
-
 export type SectionBlock =
-  | CurrentFocusSection
   | WorkspaceGearSection
   | ProductivityStackSection
   | AiWorkspaceSection
   | BuildingSection
-  | PreferredStarterStackSection
-  | CurrentlyReadingSection;
+  | PreferredStarterStackSection;
 
-export const CURRENT_FOCUS_MAX_ITEMS = 6;
 export const WORKSPACE_GEAR_MAX_ITEMS = 12;
 
 export function getSection<T extends SectionBlock["type"]>(
@@ -77,10 +57,10 @@ export function getSection<T extends SectionBlock["type"]>(
     | undefined;
 }
 
-/** For the two plain-string-list blocks only — Current Focus and Workspace Gear. */
+/** For Workspace Gear — the one remaining plain-string-list block. */
 export function getSectionItems(
   sections: SectionBlock[] | null | undefined,
-  type: "current_focus" | "workspace_gear"
+  type: "workspace_gear"
 ): string[] {
   return getSection(sections, type)?.items ?? [];
 }

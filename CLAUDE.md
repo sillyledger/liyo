@@ -81,10 +81,10 @@ and closes the modal; the card re-renders with the new data immediately.
 
 This pattern (`components/dashboard/modal.tsx` is the generic shell) is
 proven for the profile header and should be repeated for every future
-block (Stack, Playlist, Building, AI Workspace, Partner Shelf, Currently
-Reading) — new modal component + new draft field(s)/JSONB entry + publish
+block — new modal component + new draft field(s)/JSONB entry + publish
 logic reuses the same `handlePublish` pattern already in
-`shelf-editor.tsx`.
+`shelf-editor.tsx`. See "Current build state" below for which blocks
+exist today versus which were tried and later retired/removed.
 
 ## Design system
 
@@ -96,7 +96,7 @@ Palette (locked, do not reintroduce the original neon-green iteration):
 - **Sea** `#BED3CC` / **Sea deep** `#7FA394` — primary accent (buttons,
   badges, live-status dots, links)
 - **Coral** `#EFC8C8` / **Coral deep** `#C98D8D` / **Coral text**
-  `#7A3D3D` — warm secondary accent (book covers, "Building" tiles)
+  `#7A3D3D` — warm secondary accent (quote card glyph, error text)
 - **Umber** `#7B6767` / **Umber deep** `#5A4A4A` / **Umber light**
   `#A08D8D` — shelf ledges (literal wood tone) + neutral UI
 - **Chartreuse** `#EEEFC8` — rare, tiny pop only (e.g. the eyebrow dot on
@@ -115,7 +115,7 @@ than hardcoded palette values for anything that should visually adapt
 between modes. The *only* places raw palette tokens (`bg-sea`,
 `text-coral-deep`, `bg-umber-light`, etc.) are correct to use are
 decorative/branded elements that should look the same in both modes —
-the logo, book cover gradients, tool icon colors.
+the logo, status dots, tool icon colors.
 
 Fonts: DM Sans (body/headings) + DM Mono (labels, tags, code-ish bits),
 loaded via `next/font/google` in `app/layout.tsx`.
@@ -188,7 +188,7 @@ assuming the reported line is where the real problem is.
 - Public profile route (`app/[username]/page.tsx`) — shows avatar, name,
   bio, location, website (as a clickable link), and a "still being
   built" placeholder card when none of the built-out blocks (Mission &
-  Current Focus, Workspace) have content
+  Building, Workspace) have content
 - Dashboard shell + sidebar (`components/dashboard/dashboard-shell.tsx`,
   `sidebar.tsx`) — currently just logo + "Home," built to extend with
   more nav sections later
@@ -206,25 +206,34 @@ assuming the reported line is where the real problem is.
   fetches/passes the column alongside the other header fields
 - **`sections jsonb` is now in use**, via `lib/sections.ts`: it holds an
   array of typed blocks (`{ type, ...fields }`), e.g.
-  `{ type: "current_focus", items: string[] }` and
-  `{ type: "workspace_gear", items: string[] }` (and, as of Productivity
-  Stack/AI Workspace/Building below, object-array blocks like
-  `{ type: "building", items: BuildingItem[] }`). `getSection` reads a
-  block by type; `getSectionItems` is a `string[]`-only convenience
-  wrapper for the two plain-list blocks — use `getSection(...)?.items`
-  directly for object-array blocks instead. `upsertSection` replaces
-  just one block's entry while leaving every other block in the array
-  untouched — this is the pattern future blocks (Partner Shelf,
-  Playlist, Currently Reading) should reuse rather than inventing
-  per-block storage.
-- Mission & Current Focus card — one card, two columns. `mission` is a
-  real column (`profiles.mission` / `profile_drafts.mission`, 400-char
-  cap enforced by a DB check constraint added by hand, per this
-  project's usual 3-layer-limit pattern). Current Focus is a capped list (max 6, `CURRENT_FOCUS_MAX_ITEMS` in
-  `lib/sections.ts`) of individually editable/removable text rows via
-  the shared `EditableItemList` component
-  (`components/dashboard/editable-item-list.tsx`). Edited through
-  `edit-mission-modal.tsx`. Rendered with a checkmark-style checklist.
+  `{ type: "workspace_gear", items: string[] }` and object-array blocks
+  like `{ type: "building", items: BuildingItem[] }`. `getSection` reads
+  a block by type; `getSectionItems` is a `string[]`-only convenience
+  wrapper (only `workspace_gear` uses it now) — use `getSection(...)
+  ?.items` directly for object-array blocks instead. `upsertSection`
+  replaces just one block's entry while leaving every other block in
+  the array untouched — this is the pattern any future block should
+  reuse rather than inventing per-block storage.
+- **Mission & Building card** — one card, two columns, an 8/4-of-12
+  split with Workspace (see below). `mission` is a real column
+  (`profiles.mission` / `profile_drafts.mission`, 400-char cap enforced
+  by a DB check constraint added by hand, per this project's usual
+  3-layer-limit pattern), edited through `edit-mission-modal.tsx`
+  (mission text only now — see "Retired" below for what used to sit
+  next to it). The right column reuses Building's rendering as-is:
+  project name + status dot (`"live"` = `bg-sea-deep`, `"in_progress"`
+  = `bg-chartreuse`, the design system's one sanctioned use of
+  chartreuse) + URL + short description, unlimited items, first 3 shown
+  inline with a "View all N" overflow modal for the rest. That
+  items-or-empty-state-plus-overflow-modal logic lives in
+  `BuildingList` (`components/building-card.tsx`) — a plain list
+  renderer with no card wrapper or label of its own, so it can sit
+  inside another card's column instead of only working as a standalone
+  bordered card. Edited through the unchanged `edit-building-modal.tsx`
+  via its own edit-pencil button (each column in this card gets its own
+  button now, not one button for the whole card — see the z-index
+  gotcha below, which applies per-column here). Storage:
+  `sections.building`, unchanged.
 - Workspace card — no photo upload; the "photo" area is a **fixed**
   isometric desk illustration (`components/workspace-illustration.tsx`
   — desk, monitor, mug, plant), plain inline SVG using the `fill-sea`/
@@ -247,7 +256,7 @@ assuming the reported line is where the real problem is.
   `CLAUDE.md`'s design intent applies to the **public** page
   (`app/[username]/page.tsx`), which hides each card until it has real
   content, same as bio/quote already do.
-- Mission/Current Focus and Workspace sit **side by side in one row**,
+- Mission/Building and Workspace sit **side by side in one row**,
   an 8/4-of-12 split (`grid grid-cols-1 gap-4 sm:grid-cols-12`, cards
   use `sm:col-span-8`/`sm:col-span-4`) matching the mockup's bento
   proportions — on both `shelf-editor.tsx` and `app/[username]/page.tsx`.
@@ -287,131 +296,90 @@ assuming the reported line is where the real problem is.
   above wider rows once those rows were widened. Keep the header
   profile card sized with `flex-1` (no independent max-width) so it
   always spans whatever the shared container width is.
-- **Productivity Stack, AI Workspace, and Building** — the row below
-  Mission/Current Focus + Workspace, three equal cards
-  (`sm:col-span-4` each of 12, so Building lines up directly under
-  Workspace above it, matching the mockup). Naming note: the mockup's
-  "Tools of the Trade" card was renamed **Productivity Stack** before
-  it was ever actually built — it never existed under the old name in
-  code, only in this file's roadmap list, so there was nothing to
-  migrate.
-  - Productivity Stack and AI Workspace are **identical in shape**
-    (each item is just `{ name, url }`) and share one modal component,
-    `edit-stack-modal.tsx`, parametrized by `sectionType` (
-    `"productivity_stack"` | `"ai_workspace"`) and `title` — and one
-    display component, `components/stack-card.tsx`. Storage:
-    `sections.productivity_stack` / `sections.ai_workspace`, same
-    `getSection`/`upsertSection` pattern as every other block.
-  - Building has its own modal (`edit-building-modal.tsx`) and display
-    component (`components/building-card.tsx`) since each item carries
-    two extra fields: a short `description` and a `status` of `"live"`
-    | `"in_progress"`, shown as a small colored dot per item (green
-    `bg-sea-deep` for live — reusing the palette doc's existing
-    "live-status dot" token — amber `bg-chartreuse` for in progress,
-    which fits the design system's "chartreuse only for rare, tiny
-    accents" rule since a single status dot is exactly that). Storage:
-    `sections.building`.
-  - **None of the three have an item cap** — genuinely unlimited. Both
-    display components show only the first 3 items inline and add a
-    "View all N" button once there are more, which opens the shared
-    `components/dashboard/modal.tsx` shell listing every item in a
-    scrollable list (same row markup as the inline version). This is a
-    different pattern from Current Focus/Workspace Gear, which are
-    capped lists with no overflow modal — use the capped-list pattern
-    only when a hard limit actually makes sense, and this
-    show-3-then-"View all" pattern for anything unbounded.
-  - **No icon upload, no icon picker.** Every item's icon is
-    auto-fetched via Google's public favicon service
-    (`https://www.google.com/s2/favicons?domain={domain}&sz=128`, no
-    key required) — see `lib/logo.ts` (`domainFromUrl`/
-    `googleFaviconUrl`) and `components/item-logo.tsx` (a small client
-    component that renders the `<img>`, and on `onError` — or no URL
-    at all — falls back to a monogram in the same visual style as the
-    avatar fallback elsewhere). **This is the pattern to reuse** for
-    anything that's fundamentally "a list of external links/tools/
-    companies" instead of adding another upload field or icon picker.
-    **Do not use Clearbit's logo API for this or any future block** —
-    `logo.clearbit.com` was shut down permanently on 2025-12-08, which
-    is why this was switched to Google's favicon service.
-  - Same empty-state rule as Mission/Current Focus/Workspace: all
-    three always render on the dashboard (with a pencil-button entry
-    point, even with zero items), but each only renders on the public
-    page when it has at least one item. Since the public page can have
-    any subset of the three present, the column span is computed at
+- **Productivity Stack, AI Workspace, and Preferred Starter Stack** —
+  the row below Mission/Building + Workspace, three equal cards
+  (`sm:col-span-4` each of 12). All three are **identical in shape**
+  (each item is just `{ name, url }`) and share one modal component,
+  `edit-stack-modal.tsx`, parametrized by `sectionType` (
+  `"productivity_stack"` | `"ai_workspace"` | `"preferred_starter_stack"`)
+  and `title` — and one display component, `components/stack-card.tsx`.
+  Storage: `sections.productivity_stack` / `sections.ai_workspace` /
+  `sections.preferred_starter_stack`, same `getSection`/`upsertSection`
+  pattern as every other block. None of the three have an item cap —
+  genuinely unlimited, first 3 shown inline with a "View all N"
+  overflow modal for the rest, same as Building. Naming notes:
+  - The mockup's "Tools of the Trade" card was renamed **Productivity
+    Stack** before it was ever actually built — it never existed under
+    the old name in code, only in a roadmap list, so there was nothing
+    to migrate.
+  - **Preferred Starter Stack** was likewise renamed from the
+    mockup/roadmap's "Partner Shelf" before any code for it existed —
+    don't reintroduce either old name. Framing: the boilerplate/default
+    toolkit a dev reaches for on a new project (e.g. Vercel + Supabase
+    + Clerk + Tailwind), distinct from Productivity Stack (daily tools)
+    and AI Workspace (AI models). It moved into this row from a since-
+    removed third row (see "Removed" below) — its rendering/editing
+    code is untouched, only its position changed.
+  - **No icon upload, no icon picker** for any of the three, or for
+    Building. Every item's icon is auto-fetched via Google's public
+    favicon service (`https://www.google.com/s2/favicons?domain=
+    {domain}&sz=128`, no key required) — see `lib/logo.ts`
+    (`domainFromUrl`/`googleFaviconUrl`) and `components/item-logo.tsx`
+    (a small client component that renders the `<img>`, and on
+    `onError` — or no URL at all — falls back to a monogram in the same
+    visual style as the avatar fallback elsewhere). **This is the
+    pattern to reuse** for anything that's fundamentally "a list of
+    external links/tools/companies" instead of adding another upload
+    field or icon picker. **Do not use Clearbit's logo API for this or
+    any future block** — `logo.clearbit.com` was shut down permanently
+    on 2025-12-08, which is why this was switched to Google's favicon
+    service.
+  - Same empty-state rule as Mission/Building/Workspace: all three
+    always render on the dashboard (with a pencil-button entry point,
+    even with zero items), but each only renders on the public page
+    when it has at least one item. Since the public page can have any
+    subset of the three present, the column span is computed at
     runtime (12/6/4 for 1/2/3 visible cards) the same way the
     Mission/Workspace row already does it.
-- **Preferred Starter Stack, Playlist for Work, and Currently
-  Reading** — the row below Productivity Stack/AI Workspace/Building,
-  same equal-thirds (`sm:col-span-4`) treatment, same order left to
-  right, same always-on-dashboard/content-gated-on-public empty-state
-  rule, same runtime 12/6/4 column-span calc for whichever subset is
-  present on the public page.
-  - **Preferred Starter Stack** was renamed from the mockup/roadmap's
-    "Partner Shelf" before any code for it existed — there was nothing
-    to migrate, just don't reintroduce the old name. Framing: the
-    boilerplate/default toolkit a dev reaches for on a new project
-    (e.g. Vercel + Supabase + Clerk + Tailwind), distinct from
-    Productivity Stack (daily tools) and AI Workspace (AI models).
-    Identical shape and behavior to those two (`{ name, url }`,
-    Google-favicon icon, unlimited items, 3-inline + "View all") —
-    it reuses `EditStackModal`/`StackCard` unmodified, just a third
-    `sectionType` value (`"preferred_starter_stack"`) alongside
-    `"productivity_stack"` / `"ai_workspace"`. Storage:
-    `sections.preferred_starter_stack`.
-  - **Playlist for Work** is a single Spotify playlist link, not a
-    repeating list — the one exception to this row's shape. Stored as
-    a dedicated nullable `playlist_url` column on both `profiles` and
-    `profile_drafts` (not `sections`), since it's one scalar field, not
-    an array of items. **The column migration was not run by Claude
-    Code and still needs to be applied by hand** in the Supabase SQL
-    editor:
-    ```sql
-    alter table profiles add column playlist_url text;
-    alter table profile_drafts add column playlist_url text;
-    ```
-    The edit modal (`edit-playlist-modal.tsx`) does light validation
-    that a pasted URL matches Spotify's playlist link shape and extracts
-    the playlist ID (`lib/spotify.ts`, `extractSpotifyPlaylistId`/
-    `spotifyEmbedUrl`); rendering (`components/playlist-card.tsx`, both
-    dashboard and public) is just Spotify's own embed iframe
-    (`https://open.spotify.com/embed/playlist/{id}`) — no manual track
-    entry, no track data stored or synced on our side at all.
-  - **Currently Reading** is title + author (no ISBN from the user),
-    stored as `sections.currently_reading`, same unlimited/3-inline/
-    "View all" pattern as Building etc. Title/author fully work
-    end-to-end (save, publish, display).
-  - **Book cover art is a known non-working item, intentionally
-    deferred** — not a bug to keep chasing right now. Every book shows
-    a plain "Coming soon" placeholder (`BookCoverPlaceholder` in
-    `components/currently-reading-card.tsx`, coral-gradient box, same
-    palette tokens the old monogram fallback used) regardless of
-    title/author or any stored `cover_url`. The two-step Open Library
-    lookup that used to populate real covers (`lib/openlibrary.ts`,
-    `findBookCoverUrl`: search `openlibrary.org/search.json?title=&
-    author=` for a matching edition, then build the cover image URL
-    from its `cover_i` via `covers.openlibrary.org/b/id/{cover_id}
-    -M.jpg`) wasn't reliably returning covers. Rather than keep
-    debugging it, the call sites are disabled and left commented, not
-    deleted, so it can be revived later:
-    - `app/api/book-cover/route.ts` — the Route Handler that proxied
-      the lookup server-side (Open Library asks integrations to send an
-      identifying `User-Agent` header, which a browser `fetch()` can't
-      set client-side, so this had to be a server route in the first
-      place) is commented out, replaced with a stub `GET` that just
-      returns `{ cover_url: null }` — no network request to Open
-      Library happens.
-    - The `onBlur` lookup call in `edit-currently-reading-modal.tsx`
-      (fired on the title/author inputs) is removed entirely.
-    - `lib/openlibrary.ts` itself (`findBookCoverUrl`, including the
-      `console.error` logging added around each of its failure paths)
-      is untouched and still correct — nothing currently calls it.
-    - **This general shape — a Route Handler proxying an external API
-      that needs a server-only header or has browser CORS/no-CORS
-      restrictions, not a direct client fetch — is still the one to
-      reuse** for any future block that talks to an outside API. If
-      book covers get revisited, start by uncommenting
-      `app/api/book-cover/route.ts` and re-wiring the modal's
-      `onBlur` call.
+
+**Retired / removed** (so nobody rebuilds these by accident):
+- **Current Focus** (the checklist that used to sit next to Mission,
+  `sections.current_focus`, capped at 6 items via
+  `CURRENT_FOCUS_MAX_ITEMS`) was retired — replaced by Building's
+  rendering in that same column. Removed cleanly: nothing else
+  referenced `current_focus`, `CurrentFocusSection`, or
+  `CURRENT_FOCUS_MAX_ITEMS`, so the type, the constant, and the
+  editing UI in `edit-mission-modal.tsx` were deleted outright, not
+  deferred. `EditableItemList` (`components/dashboard/
+  editable-item-list.tsx`) is still very much alive — Workspace Gear
+  still uses it — only its Current Focus caller went away.
+- **Playlist for Work and Currently Reading were removed entirely**
+  (not deferred) — the whole third row they used to occupy (alongside
+  Preferred Starter Stack, which moved up into the row above instead)
+  is gone. Deleted outright: `components/playlist-card.tsx`,
+  `components/dashboard/edit-playlist-modal.tsx`, `lib/spotify.ts`
+  (Playlist for Work); `components/currently-reading-card.tsx`,
+  `components/dashboard/edit-currently-reading-modal.tsx`,
+  `lib/openlibrary.ts`, and `app/api/book-cover/route.ts` (Currently
+  Reading — this route had already been reduced to an unused stub in a
+  prior pass; it's now gone completely rather than left as dead code).
+  If either of these gets revisited, it'll be built fresh rather than
+  restored from history — treat any old references to a
+  `PlaylistCard`, `CurrentlyReadingCard`, `BookCoverPlaceholder`, or
+  the Open Library lookup as stale.
+  - **Orphaned DB columns/fields — schema was deliberately left alone
+    in this pass, only the app code stopped reading/writing them:**
+    `profiles.playlist_url` / `profile_drafts.playlist_url` (real
+    columns) are no longer selected, written, or rendered anywhere.
+    Any already-published `sections` jsonb blobs may still contain old
+    `{ type: "currently_reading", items: [{ title, author, cover_url
+    }] }` or `{ type: "current_focus", items: [...] }` entries from
+    before this change — `upsertSection`/`getSection` simply ignore
+    block types nothing asks for by name, so this is inert, not a bug.
+    **Dropping the `playlist_url` columns (and, if ever desired,
+    scrubbing old section types out of existing `sections` rows) is a
+    separate, dedicated migration for later** — deliberately not done
+    here.
 
 **In progress / next up:**
 - Dark mode toggle (deferred on purpose — see Design System section

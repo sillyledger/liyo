@@ -8,14 +8,10 @@ import { EditMissionModal } from "./edit-mission-modal";
 import { EditWorkspaceModal } from "./edit-workspace-modal";
 import { EditStackModal } from "./edit-stack-modal";
 import { EditBuildingModal } from "./edit-building-modal";
-import { EditPlaylistModal } from "./edit-playlist-modal";
-import { EditCurrentlyReadingModal } from "./edit-currently-reading-modal";
 import { getSection, getSectionItems, sectionsMatch, type SectionBlock } from "@/lib/sections";
 import { WorkspaceIllustration } from "@/components/workspace-illustration";
 import { StackCard } from "@/components/stack-card";
-import { BuildingCard } from "@/components/building-card";
-import { PlaylistCard } from "@/components/playlist-card";
-import { CurrentlyReadingCard } from "@/components/currently-reading-card";
+import { BuildingList } from "@/components/building-card";
 import { CARD_TAG } from "@/lib/styles";
 
 interface ProfileFields {
@@ -26,7 +22,6 @@ interface ProfileFields {
   avatar_url: string | null;
   quote: string | null;
   mission: string | null;
-  playlist_url: string | null;
   sections: SectionBlock[];
 }
 
@@ -47,7 +42,6 @@ function fieldsMatch(a: ProfileFields, b: ProfileFields | null) {
     a.avatar_url === b.avatar_url &&
     a.quote === b.quote &&
     a.mission === b.mission &&
-    a.playlist_url === b.playlist_url &&
     sectionsMatch(a.sections, b.sections)
   );
 }
@@ -81,8 +75,6 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   const [showEditAiWorkspace, setShowEditAiWorkspace] = useState(false);
   const [showEditBuilding, setShowEditBuilding] = useState(false);
   const [showEditStarterStack, setShowEditStarterStack] = useState(false);
-  const [showEditPlaylist, setShowEditPlaylist] = useState(false);
-  const [showEditCurrentlyReading, setShowEditCurrentlyReading] = useState(false);
   const [publishStatus, setPublishStatus] = useState<"idle" | "publishing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -106,7 +98,6 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
         avatar_url: draft.avatar_url,
         quote: draft.quote,
         mission: draft.mission,
-        playlist_url: draft.playlist_url,
         sections: draft.sections,
         published_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -137,13 +128,11 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   }
 
   const initial = (draft.name || username).charAt(0).toUpperCase();
-  const currentFocusItems = getSectionItems(draft.sections, "current_focus");
   const gearItems = getSectionItems(draft.sections, "workspace_gear");
   const productivityItems = getSection(draft.sections, "productivity_stack")?.items ?? [];
   const aiWorkspaceItems = getSection(draft.sections, "ai_workspace")?.items ?? [];
   const buildingItems = getSection(draft.sections, "building")?.items ?? [];
   const starterStackItems = getSection(draft.sections, "preferred_starter_stack")?.items ?? [];
-  const currentlyReadingItems = getSection(draft.sections, "currently_reading")?.items ?? [];
 
   return (
     <div className="w-full">
@@ -204,31 +193,19 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
             profile hides them entirely until they have content. Side by side —
             an 8/4-of-12 grid split, matching the mockup's bento proportions. */}
         <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
-          <div className="relative w-full rounded-[16px] border border-line bg-surface p-6 sm:col-span-8">
-            <CardEditButton onClick={() => setShowEditMission(true)} label="Edit mission & current focus" />
+          <div className="w-full rounded-[16px] border border-line bg-surface p-6 sm:col-span-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
+              <div className="relative">
+                <CardEditButton onClick={() => setShowEditMission(true)} label="Edit mission" />
                 <span className={CARD_TAG}>Mission</span>
                 <p className="mt-2 text-[14px] leading-[1.6] text-muted">
                   {draft.mission || <span className="italic text-muted-2">No mission yet.</span>}
                 </p>
               </div>
-              <div>
-                <span className={CARD_TAG}>Current focus</span>
-                {currentFocusItems.length > 0 ? (
-                  <ul className="mt-2 flex flex-col gap-2">
-                    {currentFocusItems.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-[13.5px] text-fg">
-                        <span className="mt-[3px] flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center rounded-full bg-sea text-[10px] text-slate">
-                          &#10003;
-                        </span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-2 text-[13.5px] italic text-muted-2">No items yet.</p>
-                )}
+              <div className="relative">
+                <CardEditButton onClick={() => setShowEditBuilding(true)} label="Edit building" />
+                <span className={CARD_TAG}>Building</span>
+                <BuildingList items={buildingItems} />
               </div>
             </div>
           </div>
@@ -258,9 +235,8 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
           </div>
         </div>
 
-        {/* Productivity Stack, AI Workspace, Building — always render on the
-            dashboard (owner-only), each an equal third (4/12) so Building
-            lines up under Workspace above it. */}
+        {/* Productivity Stack, AI Workspace, Preferred Starter Stack — always
+            render on the dashboard (owner-only), each an equal third (4/12). */}
         <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
           <StackCard
             label="Productivity Stack"
@@ -278,34 +254,12 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
               <CardEditButton onClick={() => setShowEditAiWorkspace(true)} label="Edit AI workspace" />
             }
           />
-          <BuildingCard
-            items={buildingItems}
-            colSpanClassName="sm:col-span-4"
-            editButton={<CardEditButton onClick={() => setShowEditBuilding(true)} label="Edit building" />}
-          />
-        </div>
-
-        {/* Preferred Starter Stack, Playlist for Work, Currently Reading — same
-            equal-thirds row treatment as the row above. */}
-        <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
           <StackCard
             label="Preferred Starter Stack"
             items={starterStackItems}
             colSpanClassName="sm:col-span-4"
             editButton={
               <CardEditButton onClick={() => setShowEditStarterStack(true)} label="Edit preferred starter stack" />
-            }
-          />
-          <PlaylistCard
-            playlistUrl={draft.playlist_url}
-            colSpanClassName="sm:col-span-4"
-            editButton={<CardEditButton onClick={() => setShowEditPlaylist(true)} label="Edit playlist for work" />}
-          />
-          <CurrentlyReadingCard
-            items={currentlyReadingItems}
-            colSpanClassName="sm:col-span-4"
-            editButton={
-              <CardEditButton onClick={() => setShowEditCurrentlyReading(true)} label="Edit currently reading" />
             }
           />
         </div>
@@ -347,7 +301,7 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
       {showEditMission && (
         <EditMissionModal
           userId={userId}
-          initial={{ mission: draft.mission, sections: draft.sections }}
+          initial={{ mission: draft.mission }}
           onClose={() => setShowEditMission(false)}
         />
       )}
@@ -393,20 +347,6 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
           namePlaceholder="Tool name"
           initial={{ sections: draft.sections }}
           onClose={() => setShowEditStarterStack(false)}
-        />
-      )}
-      {showEditPlaylist && (
-        <EditPlaylistModal
-          userId={userId}
-          initial={{ playlist_url: draft.playlist_url }}
-          onClose={() => setShowEditPlaylist(false)}
-        />
-      )}
-      {showEditCurrentlyReading && (
-        <EditCurrentlyReadingModal
-          userId={userId}
-          initial={{ sections: draft.sections }}
-          onClose={() => setShowEditCurrentlyReading(false)}
         />
       )}
     </div>

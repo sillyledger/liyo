@@ -4,14 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Modal } from "./modal";
-import { EditableItemList } from "./editable-item-list";
-import { CURRENT_FOCUS_MAX_ITEMS, getSectionItems, upsertSection, type SectionBlock } from "@/lib/sections";
 
 interface EditMissionModalProps {
   userId: string;
   initial: {
     mission: string | null;
-    sections: SectionBlock[];
   };
   onClose: () => void;
 }
@@ -24,7 +21,6 @@ const MAX_MISSION_LENGTH = 400;
 export function EditMissionModal({ userId, initial, onClose }: EditMissionModalProps) {
   const router = useRouter();
   const [mission, setMission] = useState(initial.mission ?? "");
-  const [items, setItems] = useState<string[]>(getSectionItems(initial.sections, "current_focus"));
   const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -35,18 +31,11 @@ export function EditMissionModal({ userId, initial, onClose }: EditMissionModalP
     setStatus("saving");
     setError(null);
 
-    const cleanItems = items.map((item) => item.trim()).filter(Boolean);
-    const nextSections = upsertSection(initial.sections, {
-      type: "current_focus",
-      items: cleanItems,
-    });
-
     const supabase = createClient();
     const { error: updateError } = await supabase
       .from("profile_drafts")
       .update({
         mission: mission || null,
-        sections: nextSections,
         updated_at: new Date().toISOString(),
       })
       .eq("id", userId);
@@ -62,7 +51,7 @@ export function EditMissionModal({ userId, initial, onClose }: EditMissionModalP
   }
 
   return (
-    <Modal title="Edit mission & current focus" onClose={onClose}>
+    <Modal title="Edit mission" onClose={onClose}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <div className="mb-1.5 flex items-center justify-between">
@@ -77,17 +66,6 @@ export function EditMissionModal({ userId, initial, onClose }: EditMissionModalP
             onChange={(e) => setMission(e.target.value)}
             maxLength={MAX_MISSION_LENGTH}
             placeholder="What you're here to build, longer-form"
-          />
-        </div>
-
-        <div>
-          <label className={`${labelClass} mb-1.5`}>Current focus</label>
-          <EditableItemList
-            items={items}
-            onChange={setItems}
-            max={CURRENT_FOCUS_MAX_ITEMS}
-            placeholder="e.g. Shipping the Quote feature"
-            itemMaxLength={80}
           />
         </div>
 

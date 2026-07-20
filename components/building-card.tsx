@@ -1,38 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import type { ReactNode } from "react";
 import { ItemLogo } from "@/components/item-logo";
 import { Modal } from "@/components/dashboard/modal";
-import { CARD_TAG } from "@/lib/styles";
 import type { BuildingItem } from "@/lib/sections";
 
-interface BuildingCardProps {
+interface BuildingListProps {
   items: BuildingItem[];
-  colSpanClassName: string;
-  editButton?: ReactNode;
+  emptyLabel?: string;
 }
 
 const VISIBLE_COUNT = 3;
 
-export function BuildingCard({ items, colSpanClassName, editButton }: BuildingCardProps) {
+/**
+ * Building's items-or-empty-state + "show 3 inline, View all N" overflow
+ * modal — no card wrapper or label, so it can sit inside another card's
+ * column (the Mission/Building card) as well as stand alone if reused
+ * elsewhere later.
+ */
+export function BuildingList({ items, emptyLabel = "Nothing yet." }: BuildingListProps) {
   const [showAll, setShowAll] = useState(false);
   const visible = items.slice(0, VISIBLE_COUNT);
   const hasMore = items.length > VISIBLE_COUNT;
 
   return (
-    <div className={`relative w-full rounded-[16px] border border-line bg-surface p-6 ${colSpanClassName}`}>
-      {editButton}
-      <span className={CARD_TAG}>Building</span>
-
+    <>
       {items.length > 0 ? (
-        <div className="mt-3 flex flex-col gap-3">
+        <div className="mt-2 flex flex-col gap-3">
           {visible.map((item, i) => (
             <BuildingRow key={i} item={item} />
           ))}
         </div>
       ) : (
-        <p className="mt-2 text-[13.5px] italic text-muted-2">Nothing yet.</p>
+        <p className="mt-2 text-[13.5px] italic text-muted-2">{emptyLabel}</p>
       )}
 
       {hasMore && (
@@ -54,7 +54,7 @@ export function BuildingCard({ items, colSpanClassName, editButton }: BuildingCa
           </div>
         </Modal>
       )}
-    </div>
+    </>
   );
 }
 

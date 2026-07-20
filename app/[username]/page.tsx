@@ -3,9 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSection, getSectionItems } from "@/lib/sections";
 import { WorkspaceIllustration } from "@/components/workspace-illustration";
 import { StackCard } from "@/components/stack-card";
-import { BuildingCard } from "@/components/building-card";
-import { PlaylistCard } from "@/components/playlist-card";
-import { CurrentlyReadingCard } from "@/components/currently-reading-card";
+import { BuildingList } from "@/components/building-card";
 import { CARD_TAG } from "@/lib/styles";
 
 interface ProfilePageProps {
@@ -31,7 +29,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const supabase = createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, name, bio, location, website, avatar_url, quote, mission, playlist_url, sections")
+    .select("username, name, bio, location, website, avatar_url, quote, mission, sections")
     .eq("username", params.username)
     .maybeSingle();
 
@@ -40,45 +38,27 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   }
 
   const initial = (profile.name || profile.username).charAt(0).toUpperCase();
-  const currentFocusItems = getSectionItems(profile.sections, "current_focus");
   const gearItems = getSectionItems(profile.sections, "workspace_gear");
-  const hasMissionContent = Boolean(profile.mission) || currentFocusItems.length > 0;
+  const buildingItems = getSection(profile.sections, "building")?.items ?? [];
+  const hasMissionContent = Boolean(profile.mission) || buildingItems.length > 0;
   const hasWorkspaceContent = gearItems.length > 0;
   const missionColSpan = hasWorkspaceContent ? "sm:col-span-8" : "sm:col-span-12";
   const workspaceColSpan = hasMissionContent ? "sm:col-span-4" : "sm:col-span-12";
 
   const productivityItems = getSection(profile.sections, "productivity_stack")?.items ?? [];
   const aiWorkspaceItems = getSection(profile.sections, "ai_workspace")?.items ?? [];
-  const buildingItems = getSection(profile.sections, "building")?.items ?? [];
+  const starterStackItems = getSection(profile.sections, "preferred_starter_stack")?.items ?? [];
   const hasProductivityContent = productivityItems.length > 0;
   const hasAiWorkspaceContent = aiWorkspaceItems.length > 0;
-  const hasBuildingContent = buildingItems.length > 0;
-  const visibleStackCardCount = [hasProductivityContent, hasAiWorkspaceContent, hasBuildingContent].filter(
+  const hasStarterStackContent = starterStackItems.length > 0;
+  const visibleStackCardCount = [hasProductivityContent, hasAiWorkspaceContent, hasStarterStackContent].filter(
     Boolean
   ).length;
   const stackColSpan =
     visibleStackCardCount === 1 ? "sm:col-span-12" : visibleStackCardCount === 2 ? "sm:col-span-6" : "sm:col-span-4";
 
-  const starterStackItems = getSection(profile.sections, "preferred_starter_stack")?.items ?? [];
-  const currentlyReadingItems = getSection(profile.sections, "currently_reading")?.items ?? [];
-  const hasStarterStackContent = starterStackItems.length > 0;
-  const hasPlaylistContent = Boolean(profile.playlist_url);
-  const hasCurrentlyReadingContent = currentlyReadingItems.length > 0;
-  const visibleSecondRowCount = [hasStarterStackContent, hasPlaylistContent, hasCurrentlyReadingContent].filter(
-    Boolean
-  ).length;
-  const secondRowColSpan =
-    visibleSecondRowCount === 1 ? "sm:col-span-12" : visibleSecondRowCount === 2 ? "sm:col-span-6" : "sm:col-span-4";
-
   const hasNothingElse =
-    !hasMissionContent &&
-    !hasWorkspaceContent &&
-    !hasProductivityContent &&
-    !hasAiWorkspaceContent &&
-    !hasBuildingContent &&
-    !hasStarterStackContent &&
-    !hasPlaylistContent &&
-    !hasCurrentlyReadingContent;
+    !hasMissionContent && !hasWorkspaceContent && !hasProductivityContent && !hasAiWorkspaceContent && !hasStarterStackContent;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[1180px] flex-col px-6 py-16">
@@ -140,19 +120,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <p className="mt-2 text-[14px] leading-[1.6] text-muted">{profile.mission}</p>
                   )}
                 </div>
-                {currentFocusItems.length > 0 && (
+                {buildingItems.length > 0 && (
                   <div>
-                    <span className={CARD_TAG}>Current focus</span>
-                    <ul className="mt-2 flex flex-col gap-2">
-                      {currentFocusItems.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-[13.5px] text-fg">
-                          <span className="mt-[3px] flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center rounded-full bg-sea text-[10px] text-slate">
-                            &#10003;
-                          </span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+                    <span className={CARD_TAG}>Building</span>
+                    <BuildingList items={buildingItems} />
                   </div>
                 )}
               </div>
@@ -190,20 +161,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           {hasAiWorkspaceContent && (
             <StackCard label="AI Workspace" items={aiWorkspaceItems} colSpanClassName={stackColSpan} />
           )}
-          {hasBuildingContent && <BuildingCard items={buildingItems} colSpanClassName={stackColSpan} />}
-        </div>
-      )}
-
-      {visibleSecondRowCount > 0 && (
-        <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-12 sm:items-start">
           {hasStarterStackContent && (
-            <StackCard label="Preferred Starter Stack" items={starterStackItems} colSpanClassName={secondRowColSpan} />
-          )}
-          {hasPlaylistContent && (
-            <PlaylistCard playlistUrl={profile.playlist_url} colSpanClassName={secondRowColSpan} />
-          )}
-          {hasCurrentlyReadingContent && (
-            <CurrentlyReadingCard items={currentlyReadingItems} colSpanClassName={secondRowColSpan} />
+            <StackCard label="Preferred Starter Stack" items={starterStackItems} colSpanClassName={stackColSpan} />
           )}
         </div>
       )}

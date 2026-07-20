@@ -16,7 +16,7 @@ export default async function DashboardHome() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, name, bio, location, website, avatar_url, quote, mission, playlist_url, sections, published_at")
+    .select("username, name, bio, location, website, avatar_url, quote, mission, sections, published_at")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -30,7 +30,7 @@ export default async function DashboardHome() {
 
   const { data: draft } = await supabase
     .from("profile_drafts")
-    .select("name, bio, location, website, avatar_url, quote, mission, playlist_url, sections")
+    .select("name, bio, location, website, avatar_url, quote, mission, sections")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -48,7 +48,6 @@ export default async function DashboardHome() {
             avatar_url: null,
             quote: null,
             mission: null,
-            playlist_url: null,
             sections: [],
           }
         }
