@@ -35,7 +35,7 @@ export default async function DashboardHome() {
     .maybeSingle();
 
   return (
-    <DashboardShell>
+    <DashboardShell liveUrl={`https://liyo.dev/${profile.username}`}>
       <ShelfEditor
         userId={user.id}
         username={profile.username}

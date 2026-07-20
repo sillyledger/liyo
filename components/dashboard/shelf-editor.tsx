@@ -81,7 +81,10 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
 
   const isPublished = published?.published_at != null;
   const hasChanges = !fieldsMatch(draft, published);
-  const liveUrl = `https://liyo.dev/${username}`;
+  const statusLabel = hasChanges ? "Unpublished changes" : isPublished ? "Draft matches live" : "Not published yet";
+  const statusTitle = `${isPublished ? "Published" : "Not published yet"} — ${
+    hasChanges ? "You have unpublished changes." : "Draft matches your live shelf."
+  }`;
 
   async function handlePublish() {
     setPublishStatus("publishing");
@@ -115,16 +118,9 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
   }
 
   async function handleShare() {
-    await navigator.clipboard.writeText(liveUrl);
+    await navigator.clipboard.writeText(`https://liyo.dev/${username}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }
-
-  async function signOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
   }
 
   const initial = (draft.name || username).charAt(0).toUpperCase();
@@ -136,20 +132,34 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
 
   return (
     <div className="w-full">
-      {/* Page-level toolbar — spans the full content width, matching the mockup's true top-right positioning */}
-      <div className="mb-6 flex w-full justify-end gap-2">
-        <button
-          onClick={handleShare}
-          className="rounded-[10px] border border-line-2 px-4 py-[9px] text-[13.5px] font-medium text-fg hover:border-fg"
-        >
-          {copied ? "Copied!" : "Share"}
-        </button>
-        <button
-          onClick={() => setShowEdit(true)}
-          className="rounded-[10px] bg-accent px-4 py-[9px] text-[13.5px] font-semibold text-accent-fg hover:bg-accent-hover"
-        >
-          Edit profile
-        </button>
+      {/* Page-level toolbar — spans the full content width, matching the mockup's true top-right positioning.
+          Order left to right: publish status, Publish, Share, Edit profile. */}
+      <div className="mb-6 flex w-full flex-col items-end gap-2">
+        <div className="flex items-center gap-3">
+          <span className="text-[12.5px] text-muted-2" title={statusTitle}>
+            {statusLabel}
+          </span>
+          <button
+            onClick={handlePublish}
+            disabled={publishStatus === "publishing" || !hasChanges}
+            className="rounded-[10px] bg-accent px-4 py-[9px] text-[13.5px] font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
+          >
+            {publishStatus === "publishing" ? "Publishing…" : "Publish"}
+          </button>
+          <button
+            onClick={handleShare}
+            className="rounded-[10px] border border-line-2 px-4 py-[9px] text-[13.5px] font-medium text-fg hover:border-fg"
+          >
+            {copied ? "Copied!" : "Share"}
+          </button>
+          <button
+            onClick={() => setShowEdit(true)}
+            className="rounded-[10px] bg-accent px-4 py-[9px] text-[13.5px] font-semibold text-accent-fg hover:bg-accent-hover"
+          >
+            Edit profile
+          </button>
+        </div>
+        {error && <p className="text-[13px] text-coral-text">{error}</p>}
       </div>
 
       <div className="flex w-full max-w-[1180px] flex-col">
@@ -262,32 +272,6 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
               <CardEditButton onClick={() => setShowEditStarterStack(true)} label="Edit preferred starter stack" />
             }
           />
-        </div>
-
-        <div className="mt-4 flex w-full items-center justify-between rounded-[14px] border border-line bg-surface px-5 py-4">
-          <div>
-            <p className="text-[13.5px] font-medium text-fg">
-              {isPublished ? "Published" : "Not published yet"}
-            </p>
-            <p className="text-[12px] text-muted-2">
-              {hasChanges ? "You have unpublished changes." : "Draft matches your live shelf."}
-            </p>
-          </div>
-          <button
-            onClick={handlePublish}
-            disabled={publishStatus === "publishing" || !hasChanges}
-            className="rounded-[10px] bg-accent px-4 py-[9px] text-[14px] font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
-          >
-            {publishStatus === "publishing" ? "Publishing…" : "Publish"}
-          </button>
-        </div>
-        {error && <p className="mt-2 text-[13px] text-coral-text">{error}</p>}
-
-        <div className="mt-6 flex items-center gap-4 text-[13px]">
-          <a href={liveUrl} target="_blank" rel="noreferrer" className="text-sea-deep hover:underline">View your live shelf &rarr;</a>
-          <button onClick={signOut} className="text-muted hover:text-fg">
-            Log out
-          </button>
         </div>
       </div>
 

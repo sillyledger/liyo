@@ -190,14 +190,23 @@ assuming the reported line is where the real problem is.
   built" placeholder card when none of the built-out blocks (Mission &
   Building, Workspace) have content
 - Dashboard shell + sidebar (`components/dashboard/dashboard-shell.tsx`,
-  `sidebar.tsx`) — currently just logo + "Home," built to extend with
-  more nav sections later
+  `sidebar.tsx`) — nav is still just logo + "Home" (built to extend with
+  more nav sections later), but the sidebar is now a **client component**
+  with two jobs beyond nav: it takes an optional `liveUrl` prop (only
+  passed once the user has a claimed username — see
+  `app/dashboard/page.tsx`) and pins "View your live shelf" + "Log out"
+  to the bottom of the column via `mt-auto` on their wrapper, separated
+  from the nav above by a `border-t` divider. `Log out`'s handler
+  (Supabase `signOut()` + redirect to `/login`) now lives here — it used
+  to live in `shelf-editor.tsx`, see "Header/sidebar reshuffle" below.
 - Profile header block, fully working end-to-end: edit modal
   (`edit-profile-modal.tsx`), avatar upload with 2MB cap, draft/publish
   flow (`shelf-editor.tsx`), Share button (copies public URL to
-  clipboard), positioned as a page-level toolbar (Share + Edit profile)
-  top-right, matching the approved mockup — **not** nested inside the
-  narrower profile-card column
+  clipboard), positioned as a page-level toolbar top-right, matching
+  the approved mockup — **not** nested inside the narrower profile-card
+  column. The toolbar is now **[status label] [Publish] [Share] [Edit
+  profile]** left to right — see "Header/sidebar reshuffle" below for
+  what moved and why.
 - Quote field — Quote textarea + 150-char counter in
   `edit-profile-modal.tsx`, pull-quote card (quotation glyph, italic
   line, "— Name" attribution) rendered top-right near the header in
@@ -341,6 +350,39 @@ assuming the reported line is where the real problem is.
     subset of the three present, the column span is computed at
     runtime (12/6/4 for 1/2/3 visible cards) the same way the
     Mission/Workspace row already does it.
+- **Header/sidebar reshuffle** — the dashboard's account/publish
+  controls used to live in a bottom-of-page status card ("Published"/
+  "Not published yet" + a Publish button) and a bottom-of-page footer
+  ("View your live shelf", "Log out"). Both moved, presentation-only —
+  none of the underlying publish/share/sign-out logic changed:
+  - **Publish** joined the top-right toolbar in `shelf-editor.tsx`,
+    to the left of Share and Edit profile: `[status label] [Publish]
+    [Share] [Edit profile]`. The old two-line status text ("Published"/
+    "Not published yet" + "You have unpublished changes."/"Draft
+    matches your live shelf.") is condensed to one small muted label —
+    `statusLabel` — computed from the same `isPublished`/`hasChanges`
+    values as before (`"Unpublished changes"` / `"Draft matches live"` /
+    `"Not published yet"`); the full original two-line wording survives
+    as a `title` tooltip (`statusTitle`) rather than always being shown
+    inline, per the "condense text, keep the detail in a tooltip if
+    space is tight" approach used here. The Publish button itself
+    (disabled state, `handlePublish`) is unchanged, just relocated. The
+    publish-error message (`error` state) moved with it, right-aligned
+    under the toolbar instead of under the old bottom card.
+  - **"View your live shelf" and "Log out"** moved from a footer inside
+    `shelf-editor.tsx` to the bottom of `sidebar.tsx` (see above) — this
+    is why `Sidebar` became a client component and gained a `liveUrl`
+    prop. `app/dashboard/page.tsx` passes `liveUrl` to `DashboardShell`
+    only on the path where a `profiles` row already exists (i.e. not on
+    the `ClaimUsernameForm` path, since there's no username yet to link
+    to) — `DashboardShell` forwards it straight to `Sidebar`. Link/log
+    -out styling (`text-sea-deep` for the live-shelf link, `text-muted`
+    for Log out) is carried over unchanged, just in a vertical stack
+    instead of a horizontal row, with a `border-t` divider above it
+    consistent with divider styling used elsewhere.
+  - **Scope note:** this only touched the dashboard. The public profile
+    page (`app/[username]/page.tsx`) never had any of this UI (no
+    Publish/live-shelf-link/log-out there) and wasn't touched.
 
 **Retired / removed** (so nobody rebuilds these by accident):
 - **Current Focus** (the checklist that used to sit next to Mission,
