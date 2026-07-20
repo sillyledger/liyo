@@ -13,19 +13,32 @@ export function openLibraryCoverUrl(coverId: number): string {
 export async function findBookCoverUrl(title: string, author: string): Promise<string | null> {
   if (!title.trim()) return null;
 
-  const params = new URLSearchParams({ title, limit: "1", fields: "cover_i" });
-  if (author.trim()) params.set("author", author);
+  const params = new URLSearchParams({ title: title.trim(), limit: "1", fields: "cover_i" });
+  if (author.trim()) params.set("author", author.trim());
+
+  const url = `https://openlibrary.org/search.json?${params}`;
 
   try {
-    const response = await fetch(`https://openlibrary.org/search.json?${params}`, {
+    const response = await fetch(url, {
       headers: { "User-Agent": OPEN_LIBRARY_USER_AGENT },
     });
-    if (!response.ok) return null;
+
+    if (!response.ok) {
+      console.error(`Open Library search failed (${response.status} ${response.statusText}): ${url}`);
+      return null;
+    }
 
     const data = await response.json();
     const coverId = data?.docs?.[0]?.cover_i;
-    return typeof coverId === "number" ? openLibraryCoverUrl(coverId) : null;
-  } catch {
+
+    if (typeof coverId !== "number") {
+      console.error(`Open Library search had no cover match: ${url}`, data);
+      return null;
+    }
+
+    return openLibraryCoverUrl(coverId);
+  } catch (err) {
+    console.error(`Open Library search threw: ${url}`, err);
     return null;
   }
 }

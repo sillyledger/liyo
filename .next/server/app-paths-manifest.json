@@ -3,7 +3,7 @@
   "/auth/callback/route": "app/auth/callback/route.js",
   "/[username]/page": "app/[username]/page.js",
   "/api/book-cover/route": "app/api/book-cover/route.js",
-  "/dashboard/page": "app/dashboard/page.js",
   "/dashboard/login/page": "app/dashboard/login/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
 }

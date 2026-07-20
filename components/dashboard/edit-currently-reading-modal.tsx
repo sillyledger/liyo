@@ -45,10 +45,15 @@ export function EditCurrentlyReadingModal({ userId, initial, onClose }: EditCurr
     try {
       const params = new URLSearchParams({ title: item.title.trim(), author: item.author.trim() });
       const res = await fetch(`/api/book-cover?${params}`);
+      if (!res.ok) {
+        console.error(`/api/book-cover returned ${res.status} for "${item.title}"`);
+        return;
+      }
       const data = await res.json();
       updateItem(index, { cover_url: data.cover_url ?? null });
-    } catch {
+    } catch (err) {
       // Leave cover_url as-is — the card falls back to a placeholder when it's null.
+      console.error(`Cover lookup failed for "${item.title}"`, err);
     }
   }
 

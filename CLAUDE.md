@@ -394,8 +394,17 @@ assuming the reported line is where the real problem is.
     JS, so the request has to be proxied server-side regardless. The
     modal calls this route on blur of the title/author inputs (not on
     every keystroke) and stores whatever cover URL comes back on the
-    item itself. **This same lookup pattern is the one to reuse** if a
-    future block ever needs other book-like/edition-shaped data.
+    item itself. `findBookCoverUrl` (`lib/openlibrary.ts`) logs a
+    `console.error` with the actual request URL and response/error on
+    every failure path (non-OK response, no cover in the result, thrown
+    exception) — a silent `return null` there had made a real outage
+    indistinguishable from "this book just has no cover," so any future
+    lookup helper that can fail silently should log the same way.
+    **This general shape — a Route Handler proxying an external API
+    that needs a server-only header or has browser CORS/no-CORS
+    restrictions, not a direct client fetch — is the one to reuse** for
+    any future block that talks to an outside API, not just book-like
+    lookups.
 
 **In progress / next up:**
 - Dark mode toggle (deferred on purpose — see Design System section
