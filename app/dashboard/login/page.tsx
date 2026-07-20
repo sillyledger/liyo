@@ -56,7 +56,7 @@ export default function LoginPage() {
               {status === "sending" ? "Sending…" : "Send magic link"}
             </button>
             {status === "error" && (
-              <p className="text-[13px] text-coral-text">
+              <p className="text-[13px] text-warm">
                 Something went wrong — try again.
               </p>
             )}

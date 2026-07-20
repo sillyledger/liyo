@@ -43,7 +43,7 @@ export function StackCard({ label, items, colSpanClassName, editButton, emptyLab
         <button
           type="button"
           onClick={() => setShowAll(true)}
-          className="mt-3 text-[12.5px] font-medium text-sea-deep hover:underline"
+          className="mt-3 text-[12.5px] font-medium text-accent hover:underline"
         >
           View all {items.length}
         </button>

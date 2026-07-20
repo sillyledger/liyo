@@ -87,7 +87,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
         {profile.quote && (
           <div className="w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:max-w-[280px]">
-            <span className="font-serif text-[40px] leading-none text-coral-deep">&ldquo;</span>
+            <span className="font-serif text-[40px] leading-none text-warm">&ldquo;</span>
             <p className="mt-1 text-[14px] italic leading-[1.55] text-fg">{profile.quote}</p>
             <p className="mt-3 text-[12.5px] text-muted-2">— {profile.name || profile.username}</p>
           </div>
@@ -104,7 +104,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <div className="mt-3 flex flex-wrap gap-4 text-[13px] text-muted-2">
           {profile.location && <span>{profile.location}</span>}
           {profile.website && (
-            <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noreferrer" className="text-sea-deep hover:underline">{profile.website}</a>
+            <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noreferrer" className="text-accent hover:underline">{profile.website}</a>
           )}
         </div>
       )}

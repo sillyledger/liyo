@@ -39,7 +39,7 @@ export function BuildingList({ items, emptyLabel = "Nothing yet." }: BuildingLis
         <button
           type="button"
           onClick={() => setShowAll(true)}
-          className="mt-3 text-[12.5px] font-medium text-sea-deep hover:underline"
+          className="mt-3 text-[12.5px] font-medium text-accent hover:underline"
         >
           View all {items.length}
         </button>

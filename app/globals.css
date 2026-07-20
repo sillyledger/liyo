@@ -2,40 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Values sourced from liyo-profile-mockup-palette3.html's :root and
+   [data-theme="dark"] blocks — that mockup is the active design
+   reference (palette2 is superseded). Variable *names* here predate
+   the mockup and stay as-is so no component needs to change which
+   Tailwind classes it uses; only the values were ported.
+   Mapping: mockup --card -> --surface, --card-alt -> --surface-2,
+   --text-primary -> --fg, --text-secondary -> --muted (readable
+   secondary text), --text-muted -> --muted-2 (de-emphasized labels/
+   subtext), --border -> --line, --accent(-text) -> --accent(-fg),
+   --amber -> --warm. --accent-hover, --line-2, and --shadow-color have
+   no mockup equivalent (it's a static reference with no interaction
+   states) and are derived by hand. --ledge-a/-b are homepage-only
+   decorative wood tones the mockup doesn't cover — left unchanged. */
 :root {
-  --bg: #EBE9E4;
-  --surface: #F6F4EF;
-  --surface-2: #EFEDE5;
-  --fg: #2B2539;
-  --muted: #6E6779;
-  --muted-2: #8B8598;
-  --line: rgba(43, 37, 57, 0.08);
-  --line-2: rgba(43, 37, 57, 0.14);
-  --accent: #7FA394;
-  --accent-fg: #F6F4EF;
-  --accent-hover: #6F927F;
-  --warm: #C98D8D;
+  --bg: #EFEDE5;
+  --surface: #F8F7F1;
+  --surface-2: #F2F0E8;
+  --fg: #26251F;
+  --muted: #706E64;
+  --muted-2: #A6A398;
+  --line: rgba(30, 28, 22, 0.08);
+  --line-2: rgba(30, 28, 22, 0.16);
+  --accent: #7C9473;
+  --accent-fg: #F5F8F3;
+  --accent-hover: #6D8265;
+  --warm: #C98A3C;
   --ledge-a: #A08D8D;
   --ledge-b: #7B6767;
-  --shadow-color: rgba(43, 37, 57, 0.18);
+  --shadow-color: rgba(38, 37, 31, 0.18);
 }
 
-/* Dark mode is wired up and ready to go — add class="dark" to <html> in
-   layout.tsx whenever we build the theme toggle. No component changes
-   will be needed; everything reads from these variables. */
 .dark {
-  --bg: #2B2539;
-  --surface: #342E44;
-  --surface-2: #3D3650;
-  --fg: #EBE9E4;
-  --muted: #A79FB5;
-  --muted-2: #847C93;
-  --line: rgba(235, 233, 228, 0.09);
-  --line-2: rgba(235, 233, 228, 0.16);
-  --accent: #BED3CC;
-  --accent-fg: #1D3A30;
-  --accent-hover: #D3E3DD;
-  --warm: #EFC8C8;
+  --bg: #201E19;
+  --surface: #29271F;
+  --surface-2: #322F26;
+  --fg: #F0EEE6;
+  --muted: #A8A69C;
+  --muted-2: #78766B;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.16);
+  --accent: #8FAE82;
+  --accent-fg: #1B2A17;
+  --accent-hover: #A4C896;
+  --warm: #E3A857;
   --ledge-a: #7B6767;
   --ledge-b: #5A4A4A;
   --shadow-color: rgba(0, 0, 0, 0.4);

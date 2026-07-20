@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>liyo — profile mockup, palette 3</title>
+<style>
+  :root {
+    --bg: #EFEDE5;
+    --card: #F8F7F1;
+    --card-alt: #F2F0E8;
+    --border: rgba(30,28,22,0.08);
+    --text-primary: #26251F;
+    --text-secondary: #706E64;
+    --text-muted: #A6A398;
+    --accent: #7C9473;
+    --accent-text: #F5F8F3;
+    --amber: #C98A3C;
+  }
+  html[data-theme="dark"] {
+    --bg: #201E19;
+    --card: #29271F;
+    --card-alt: #322F26;
+    --border: rgba(255,255,255,0.08);
+    --text-primary: #F0EEE6;
+    --text-secondary: #A8A69C;
+    --text-muted: #78766B;
+    --accent: #8FAE82;
+    --accent-text: #1B2A17;
+    --amber: #E3A857;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "DM Sans", Inter, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    display: flex;
+    min-height: 100vh;
+  }
+  a { text-decoration: none; color: inherit; }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+    border-right: 0.5px solid var(--border);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; margin-bottom: 24px; }
+  .logo-mark { width: 18px; height: 18px; background: var(--accent); border-radius: 4px; }
+  .nav-item { font-size: 13px; padding: 7px 10px; border-radius: 8px; color: var(--text-secondary); margin-bottom: 2px; }
+  .nav-item.active { background: var(--card-alt); color: var(--text-primary); font-weight: 500; }
+  .nav-section { font-size: 10px; letter-spacing: 0.6px; color: var(--text-muted); margin: 18px 0 6px 10px; }
+
+  .sidebar-footer { display: flex; flex-direction: column; gap: 10px; }
+  .theme-toggle { display: flex; border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; width: fit-content; }
+  .theme-toggle button {
+    font-size: 11px; padding: 5px 12px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; font-family: inherit;
+  }
+  .theme-toggle button.active { background: var(--accent); color: var(--accent-text); font-weight: 500; }
+  .footer-links { border-top: 0.5px solid var(--border); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .footer-links a { font-size: 12px; }
+  .live-link { color: var(--accent); display: flex; align-items: center; gap: 4px; }
+  .logout-link { color: var(--text-muted); }
+
+  .main { flex: 1; padding: 24px 32px; }
+  .content { max-width: 1180px; margin: 0 auto; }
+
+  .header-row { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 20px; }
+  .status-text { font-size: 13px; color: var(--text-muted); margin-right: 4px; }
+  .btn { font-size: 13px; padding: 8px 16px; border-radius: 8px; border: 0.5px solid var(--border); background: transparent; color: var(--text-primary); cursor: pointer; font-family: inherit; }
+  .btn:disabled { color: var(--text-muted); cursor: default; }
+  .btn-primary { background: var(--accent); color: var(--accent-text); border: none; font-weight: 500; }
+
+  .row { display: grid; gap: 16px; margin-bottom: 16px; }
+  .row-top { grid-template-columns: 1.6fr 1fr; }
+  .row-mid { grid-template-columns: 1.6fr 1fr; }
+  .row-bottom { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card { background: var(--card); border-radius: 16px; padding: 24px 28px; border: 0.5px solid var(--border); }
+  .label { font-size: 11px; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 10px; }
+  .avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--card-alt); margin-bottom: 14px; }
+  .name { font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+  .handle { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+  .bio { font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; }
+  .meta { font-size: 13px; color: var(--text-muted); display: flex; gap: 16px; }
+
+  .quote-mark { color: var(--amber); font-size: 24px; line-height: 1; margin-bottom: 8px; }
+  .quote-text { font-size: 15px; font-style: italic; color: var(--text-primary); margin-bottom: 10px; }
+  .quote-author { font-size: 13px; color: var(--text-muted); }
+
+  .split-card { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .item { font-size: 14px; color: var(--text-primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .item-sub { font-size: 12px; color: var(--text-muted); margin-left: 14px; }
+
+  .workspace-visual { height: 100px; background: var(--card-alt); border-radius: 10px; margin-bottom: 14px; }
+  .stack-item { font-size: 14px; margin-bottom: 8px; }
+  .stack-sub { font-size: 12px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div>
+    <div class="logo"><span class="logo-mark"></span>liyo</div>
+    <div class="nav-item active">Home</div>
+
+    <div class="nav-section">Explore</div>
+    <a href="#"><div class="nav-item">Founders</div></a>
+    <a href="#"><div class="nav-item">Stacks</div></a>
+    <a href="#"><div class="nav-item">Tools</div></a>
+    <a href="#"><div class="nav-item">Collections</div></a>
+
+    <div class="nav-section">Shelf</div>
+    <a href="#"><div class="nav-item">Books</div></a>
+    <a href="#"><div class="nav-item">Apps</div></a>
+    <a href="#"><div class="nav-item">Podcasts</div></a>
+    <a href="#"><div class="nav-item">Playlists</div></a>
+    <a href="#"><div class="nav-item">Gear</div></a>
+    <a href="#"><div class="nav-item">Places</div></a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="theme-toggle">
+      <button id="btn-dark" onclick="setTheme('dark')">Dark</button>
+      <button id="btn-light" onclick="setTheme('light')">Light</button>
+    </div>
+    <div class="footer-links">
+      <a href="#" class="live-link">View your live shelf →</a>
+      <a href="#" class="logout-link">Log out</a>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="content">
+
+    <div class="header-row">
+      <span class="status-text">Draft matches live</span>
+      <button class="btn" disabled>Publish</button>
+      <button class="btn">Share</button>
+      <button class="btn btn-primary">Edit profile</button>
+    </div>
+
+    <div class="row row-top">
+      <div class="card">
+        <div class="avatar"></div>
+        <div class="name">Pieter</div>
+        <div class="handle">@pieter</div>
+        <div class="bio">I am a writer, content creator, and founder based in Taichung, Taiwan, and London</div>
+        <div class="meta"><span>Taichung</span><span>pieterborremans.com</span></div>
+      </div>
+      <div class="card">
+        <div class="quote-mark">&ldquo;</div>
+        <div class="quote-text">Resilience is the most underrated skill.</div>
+        <div class="quote-author">— Pieter</div>
+      </div>
+    </div>
+
+    <div class="row row-mid">
+      <div class="card split-card">
+        <div>
+          <div class="label">Mission</div>
+          <div class="bio">Building a portfolio of small micro-SaaS apps, including this platform. Supported by a media and niche blog network.</div>
+        </div>
+        <div>
+          <div class="label">Building</div>
+          <div class="item"><span class="dot"></span>Sorano</div>
+          <div class="item-sub">Let users vote on what's next.</div>
+          <div class="item" style="margin-top:10px"><span class="dot"></span>Liyo</div>
+          <div class="item-sub">This platform, your shelf</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="workspace-visual"></div>
+        <div class="label">Workspace</div>
+        <div class="stack-item">MacBook Air M5</div>
+        <div class="stack-item">iPad Pro M2</div>
+        <div class="stack-item">Bose Q45 Headphones</div>
+      </div>
+    </div>
+
+    <div class="row row-bottom">
+      <div class="card">
+        <div class="label">Productivity stack</div>
+        <div class="stack-item">Notion<div class="stack-sub">notion.com</div></div>
+        <div class="stack-item">Spacemail<div class="stack-sub">spacemail.com</div></div>
+      </div>
+      <div class="card">
+        <div class="label">AI workspace</div>
+        <div class="stack-item">Claude<div class="stack-sub">claude.ai</div></div>
+        <div class="stack-item">Cursor<div class="stack-sub">cursor.com</div></div>
+      </div>
+      <div class="card">
+        <div class="label">Preferred starter stack</div>
+        <div class="stack-item">Vercel</div>
+        <div class="stack-item">Supabase</div>
+        <div class="stack-item">Clerk</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('btn-dark').classList.toggle('active', t === 'dark');
+    document.getElementById('btn-light').classList.toggle('active', t === 'light');
+    localStorage.setItem('liyo-mockup-theme', t);
+  }
+  setTheme(localStorage.getItem('liyo-mockup-theme') || 'light');
+</script>
+
+</body>
+</html>

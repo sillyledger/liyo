@@ -74,7 +74,13 @@ website, avatar_url, quote) are implemented as real columns so far.
 
 Deliberately **not** a Framer/Webflow-style free-form canvas. The layout
 is a fixed bento grid (see the approved mockup —
-`liyo-profile-mockup-palette2.html` if still in the repo/chat history).
+`liyo-profile-mockup-palette3.html` in the repo root, the **active**
+design reference; `palette2` is superseded — its layout became today's
+2-row Mission+Building/Workspace then Productivity Stack/AI Workspace/
+Preferred Starter Stack arrangement, and it's now also the source for
+the actual color values, the dark-mode palette, and the sidebar's
+Explore/Shelf nav grouping — see "Design system" and "Current build
+state" below).
 Each card has an edit-pencil / "Edit profile" button that opens a
 **modal** scoped to just that block's fields. Save writes to the draft
 and closes the modal; the card re-renders with the new data immediately.
@@ -88,34 +94,68 @@ exist today versus which were tried and later retired/removed.
 
 ## Design system
 
-Palette (locked, do not reintroduce the original neon-green iteration):
+**Two separate color systems — don't confuse them:**
 
-- **Slate** `#2B2539` — dark-mode background
-- **Oatmeal** `#EBE9E4` — light-mode background (**light mode is the
-  current build target**)
-- **Sea** `#BED3CC` / **Sea deep** `#7FA394` — primary accent (buttons,
-  badges, live-status dots, links)
+1. **The semantic CSS variables** (`--bg`, `--surface`, `--surface-2`,
+   `--fg`, `--muted`, `--muted-2`, `--line`, `--line-2`, `--accent`,
+   `--accent-fg`, `--accent-hover`, `--warm`, defined in
+   `app/globals.css`'s `:root` and `.dark` blocks) are what actually
+   drive the app's light/dark appearance, via the matching Tailwind
+   classes (`bg-bg`, `bg-surface`, `text-fg`, `text-muted`,
+   `text-muted-2`, `border-line`, `border-line-2`, `bg-accent`,
+   `text-accent-fg`, `hover:bg-accent-hover`, `text-warm`). **Every
+   component that should visually adapt between modes must use these**,
+   never a hardcoded hex or a raw palette token.
+2. **The locked raw Tailwind palette** (`slate`, `oatmeal`, `sea`/
+   `sea-deep`, `coral`/`coral-deep`/`coral-text`, `umber`/`umber-deep`/
+   `umber-light`, `chartreuse`, defined in `tailwind.config.ts`) is a
+   fixed, non-adaptive set of colors reserved for **decorative
+   elements that should look identical in both modes** — the logo
+   (`components/logo.tsx`), Building's live/in-progress status dots
+   (`bg-sea-deep`/`bg-chartreuse`), the Workspace illustration's SVG
+   fills, the Workspace card's location-badge overlay (`bg-slate/70` +
+   `text-oatmeal` — a fixed dark-glass pill, intentionally the same
+   regardless of page theme, like a photo caption), the modal
+   backdrop's dim scrim (`bg-slate/40`), and the homepage's marketing
+   decoration (`hero.tsx`, `shelf.tsx`). **Do not use these raw tokens
+   for anything that reads as body text, a link, or an error/status
+   message** — those need the semantic tokens above so they stay
+   legible when the theme changes. (This distinction is why, e.g., the
+   quote-card glyph and every form's error text were switched from
+   `text-coral-deep`/`text-coral-text` to `text-warm` when dark mode
+   went live — the old raw-coral versions were unreadable — dark
+   maroon on a near-black card — once dark mode actually rendered;
+   `sea-deep` was likewise swapped to `text-accent` wherever it was
+   functioning as a link/accent color, e.g. the website link and the
+   "View all N" overflow links, for the same reason.)
+
+Palette (raw tokens, locked — do not reintroduce the original
+neon-green iteration):
+
+- **Slate** `#2B2539` — dark-glass overlays (see above)
+- **Oatmeal** `#EBE9E4` — text-on-slate-overlay color
+- **Sea** `#BED3CC` / **Sea deep** `#7FA394` — status dots, decorative
+  illustration fills
 - **Coral** `#EFC8C8` / **Coral deep** `#C98D8D` / **Coral text**
-  `#7A3D3D` — warm secondary accent (quote card glyph, error text)
+  `#7A3D3D` — homepage-only decorative use now (`shelf.tsx`); no
+  longer used for the quote glyph or error text (see above)
 - **Umber** `#7B6767` / **Umber deep** `#5A4A4A` / **Umber light**
-  `#A08D8D` — shelf ledges (literal wood tone) + neutral UI
-- **Chartreuse** `#EEEFC8` — rare, tiny pop only (e.g. the eyebrow dot on
-  the homepage hero). Never use it for anything larger — it stops
-  reading as a deliberate accent if overused.
+  `#A08D8D` — shelf ledges (literal wood tone), Workspace illustration
+- **Chartreuse** `#EEEFC8` — rare, tiny pop only (e.g. the homepage
+  hero's eyebrow dot, Building's "in progress" status dot). Never use
+  it for anything larger — it stops reading as a deliberate accent if
+  overused.
 
-**Dark mode is wired but dormant.** `app/globals.css` has a full `.dark`
-CSS-variable block already written (values mirror the light block, just
-swapped), and `tailwind.config.ts` has `darkMode: "class"` set. Turning
-it on later is just: build a toggle, add the `dark` class to `<html>`.
-**Zero component rewrites needed — as long as every component keeps
-using the semantic tokens** (`bg-bg`, `bg-surface`, `bg-surface-2`,
-`text-fg`, `text-muted`, `text-muted-2`, `border-line`, `border-line-2`,
-`bg-accent`, `text-accent-fg`, `bg-accent-hover`, `text-warm`) rather
-than hardcoded palette values for anything that should visually adapt
-between modes. The *only* places raw palette tokens (`bg-sea`,
-`text-coral-deep`, `bg-umber-light`, etc.) are correct to use are
-decorative/branded elements that should look the same in both modes —
-the logo, status dots, tool icon colors.
+**Dark mode is live** (toggle in the dashboard sidebar; see "Current
+build state" below for the full implementation). The semantic CSS
+variable *values* come from `liyo-profile-mockup-palette3.html`'s
+`:root`/`[data-theme="dark"]` blocks — that mockup is the source of
+truth for both palettes, ported onto our pre-existing variable names
+(see the mapping comment at the top of `app/globals.css`) so no
+component had to change which Tailwind class it uses, only the
+variable definitions changed. `--ledge-a`/`--ledge-b` (the homepage's
+wood-tone shelf ledges) aren't part of the mockup and were left
+unchanged in both modes.
 
 Fonts: DM Sans (body/headings) + DM Mono (labels, tags, code-ish bits),
 loaded via `next/font/google` in `app/layout.tsx`.
@@ -293,9 +333,9 @@ assuming the reported line is where the real problem is.
     into a stacked column instead of a row. (Cards in a `grid` row
     avoid this — an explicit `col-span-*` is enough.)
 - **Content max-width is 1180px**, matching the approved mockup's
-  `.main` container (`liyo-profile-mockup-palette2.html`, if still
-  around — width next to its sidebar). Both `shelf-editor.tsx`'s
-  outermost wrapper and `app/[username]/page.tsx`'s `<main>` use
+  `.content` container (`liyo-profile-mockup-palette3.html` — width
+  next to its sidebar). Both `shelf-editor.tsx`'s outermost wrapper
+  and `app/[username]/page.tsx`'s `<main>` use
   `max-w-[1180px]`, not the earlier, too-narrow `max-w-[760px]` (which
   caused short text like tool/gear names to wrap awkwardly). Any new
   card row should size itself within this same 1180px column rather
@@ -376,13 +416,84 @@ assuming the reported line is where the real problem is.
     only on the path where a `profiles` row already exists (i.e. not on
     the `ClaimUsernameForm` path, since there's no username yet to link
     to) — `DashboardShell` forwards it straight to `Sidebar`. Link/log
-    -out styling (`text-sea-deep` for the live-shelf link, `text-muted`
-    for Log out) is carried over unchanged, just in a vertical stack
-    instead of a horizontal row, with a `border-t` divider above it
-    consistent with divider styling used elsewhere.
+    -out styling (`text-muted` for Log out) is carried over unchanged,
+    just in a vertical stack instead of a horizontal row, with a
+    `border-t` divider above it consistent with divider styling used
+    elsewhere. (The live-shelf link's color was later switched from
+    `text-sea-deep` to `text-accent` when dark mode went live — see
+    below — so it'd actually adapt between themes; that's the only
+    thing about it that's changed since this reshuffle.)
   - **Scope note:** this only touched the dashboard. The public profile
     page (`app/[username]/page.tsx`) never had any of this UI (no
     Publish/live-shelf-link/log-out there) and wasn't touched.
+- **Header alignment fix** — the toolbar row (status/Publish/Share/
+  Edit profile) used to be a sibling *before* the `max-w-[1180px]`
+  content wrapper in `shelf-editor.tsx`, so it spanned the full flex
+  area next to the sidebar (wider than 1180px on large viewports) while
+  the cards below were capped at 1180px — the toolbar's right edge and
+  the cards' right edge didn't line up. Fixed by moving the toolbar
+  **inside** the same `max-w-[1180px]` wrapper as everything else,
+  instead of introducing a second, duplicate max-width container. The
+  public profile page never had this problem (its `<main>` was already
+  the single outermost `max-w-[1180px]` element with nothing outside
+  it).
+- **Dark mode is live.** Implementation, end to end:
+  - `lib/theme.ts` exports `THEME_STORAGE_KEY` (`"liyo-theme"`, a
+    `localStorage` key) and `THEME_INIT_SCRIPT`, a blocking script
+    string. `app/layout.tsx` renders that script inside a manual
+    `<head>` (App Router root layouts render the full document shell,
+    so this is a supported place for it) *before* `{children}` — it
+    runs before hydration, reads the stored choice or falls back to
+    `prefers-color-scheme`, and adds the `dark` class straight to
+    `document.documentElement` if needed. This is what avoids a flash
+    of the wrong theme on first paint. The `<html>` tag has
+    `suppressHydrationWarning` because this script intentionally
+    mutates its class before React hydrates it — that's expected, not
+    a bug to fix.
+  - `components/dashboard/theme-toggle.tsx` (`ThemeToggle`) is the
+    explicit Dark/Light control — a small two-button pill matching the
+    mockup, rendered only in `components/dashboard/sidebar.tsx`, above
+    the "View your live shelf"/Log out block. It starts with **neither**
+    button highlighted (matching what's server-rendered, since
+    `document` doesn't exist during SSR) and reads the real state via
+    `useEffect` after mount — reading `document.documentElement` during
+    the initial render instead would create a hydration mismatch, so
+    don't "simplify" this to a lazy `useState` initializer. Clicking a
+    button toggles the `dark` class directly and writes to
+    `localStorage` via `THEME_STORAGE_KEY`.
+  - **The public profile page has no toggle and just follows system
+    preference** — this was a deliberate choice, not an oversight.
+    Reasoning: (1) the page is meant to be a clean, shareable link,
+    not a settings surface for visitors; (2) since the dashboard lives
+    on `shelf.liyo.dev` and the public page on bare `liyo.dev` —
+    different origins — `localStorage` is naturally isolated between
+    them anyway, so a dashboard user's explicit theme choice was never
+    going to carry over to visits on the public domain regardless; it
+    falls back to system preference there every time, which is exactly
+    the desired behavior with zero extra code required to enforce it.
+  - **Every existing component was audited for raw, non-adaptive color
+    usage that would break in dark mode** — see the "Design system"
+    section above for the full list of what got switched from a raw
+    palette token to a semantic one (`text-coral-deep`/`text-coral-text`
+    → `text-warm`; `text-sea-deep` → `text-accent` for functional
+    links) versus what was intentionally left raw (status dots, the
+    logo, the Workspace location-badge overlay, the modal backdrop,
+    homepage decoration). Mission, Building, Workspace, Productivity
+    Stack, AI Workspace, Preferred Starter Stack, Quote, and the
+    profile header all already used the semantic tokens for their
+    actual content and needed no structural changes — only those
+    specific raw-token spots needed fixing.
+- **Sidebar now shows hardcoded Explore and Shelf nav sections** —
+  `Explore` (Founders, Stacks, Tools, Collections) and `Shelf` (Books,
+  Apps, Podcasts, Playlists, Gear, Places), rendered via a small
+  `NavSection` helper in `sidebar.tsx`, matching the mockup's grouping
+  exactly. **These are placeholder/visual only** — every item links to
+  `href="#"`, none of them are wired to real routes or data, and none
+  of this was built out as actual pages. This is purely so the sidebar
+  visually matches the mockup while a decision on whether to build any
+  of it out is still pending — don't mistake these for real nav or
+  start building `/explore/founders`-style routes without a fresh
+  decision to do so.
 
 **Retired / removed** (so nobody rebuilds these by accident):
 - **Current Focus** (the checklist that used to sit next to Mission,
@@ -424,9 +535,9 @@ assuming the reported line is where the real problem is.
     here.
 
 **In progress / next up:**
-- Dark mode toggle (deferred on purpose — see Design System section
-  above; foundation is ready, just needs the toggle UI + `dark` class
-  wiring in `app/layout.tsx`).
+- Whether to actually build out the sidebar's Explore/Shelf sections
+  (currently hardcoded/inert placeholders — see "Current build state"
+  above) is an open decision, not started either way.
 - Homepage sections beyond the hero (how-it-works, examples grid) —
   not started.
 

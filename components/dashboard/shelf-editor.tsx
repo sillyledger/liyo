@@ -132,37 +132,39 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
 
   return (
     <div className="w-full">
-      {/* Page-level toolbar — spans the full content width, matching the mockup's true top-right positioning.
-          Order left to right: publish status, Publish, Share, Edit profile. */}
-      <div className="mb-6 flex w-full flex-col items-end gap-2">
-        <div className="flex items-center gap-3">
-          <span className="text-[12.5px] text-muted-2" title={statusTitle}>
-            {statusLabel}
-          </span>
-          <button
-            onClick={handlePublish}
-            disabled={publishStatus === "publishing" || !hasChanges}
-            className="rounded-[10px] bg-accent px-4 py-[9px] text-[13.5px] font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
-          >
-            {publishStatus === "publishing" ? "Publishing…" : "Publish"}
-          </button>
-          <button
-            onClick={handleShare}
-            className="rounded-[10px] border border-line-2 px-4 py-[9px] text-[13.5px] font-medium text-fg hover:border-fg"
-          >
-            {copied ? "Copied!" : "Share"}
-          </button>
-          <button
-            onClick={() => setShowEdit(true)}
-            className="rounded-[10px] bg-accent px-4 py-[9px] text-[13.5px] font-semibold text-accent-fg hover:bg-accent-hover"
-          >
-            Edit profile
-          </button>
-        </div>
-        {error && <p className="text-[13px] text-coral-text">{error}</p>}
-      </div>
-
       <div className="flex w-full max-w-[1180px] flex-col">
+        {/* Page-level toolbar — inside the same max-width container as the
+            cards below, so its right edge lines up with theirs instead of
+            spanning the full (wider) flex area next to the sidebar.
+            Order left to right: publish status, Publish, Share, Edit profile. */}
+        <div className="mb-6 flex w-full flex-col items-end gap-2">
+          <div className="flex items-center gap-3">
+            <span className="text-[12.5px] text-muted-2" title={statusTitle}>
+              {statusLabel}
+            </span>
+            <button
+              onClick={handlePublish}
+              disabled={publishStatus === "publishing" || !hasChanges}
+              className="rounded-[10px] bg-accent px-4 py-[9px] text-[13.5px] font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
+            >
+              {publishStatus === "publishing" ? "Publishing…" : "Publish"}
+            </button>
+            <button
+              onClick={handleShare}
+              className="rounded-[10px] border border-line-2 px-4 py-[9px] text-[13.5px] font-medium text-fg hover:border-fg"
+            >
+              {copied ? "Copied!" : "Share"}
+            </button>
+            <button
+              onClick={() => setShowEdit(true)}
+              className="rounded-[10px] bg-accent px-4 py-[9px] text-[13.5px] font-semibold text-accent-fg hover:bg-accent-hover"
+            >
+              Edit profile
+            </button>
+          </div>
+          {error && <p className="text-[13px] text-warm">{error}</p>}
+        </div>
+
         <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start">
           <div className="w-full flex-1 rounded-[16px] border border-line bg-surface p-8">
             <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full border border-line-2 bg-gradient-to-br from-surface-2 to-bg font-mono text-[14px] text-muted">
@@ -191,7 +193,7 @@ export function ShelfEditor({ userId, username, draft, published }: ShelfEditorP
 
           {draft.quote && (
             <div className="w-full flex-shrink-0 rounded-[16px] border border-line bg-surface p-6 sm:max-w-[240px]">
-              <span className="font-serif text-[40px] leading-none text-coral-deep">&ldquo;</span>
+              <span className="font-serif text-[40px] leading-none text-warm">&ldquo;</span>
               <p className="mt-1 text-[14px] italic leading-[1.55] text-fg">{draft.quote}</p>
               <p className="mt-3 text-[12.5px] text-muted-2">— {draft.name || username}</p>
             </div>

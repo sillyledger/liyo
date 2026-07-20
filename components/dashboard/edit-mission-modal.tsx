@@ -56,7 +56,7 @@ export function EditMissionModal({ userId, initial, onClose }: EditMissionModalP
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <label className={labelClass}>Mission</label>
-            <span className={`text-[11.5px] ${missionNearLimit ? "text-coral-text" : "text-muted-2"}`}>
+            <span className={`text-[11.5px] ${missionNearLimit ? "text-warm" : "text-muted-2"}`}>
               {mission.length}/{MAX_MISSION_LENGTH}
             </span>
           </div>
@@ -69,7 +69,7 @@ export function EditMissionModal({ userId, initial, onClose }: EditMissionModalP
           />
         </div>
 
-        {error && <p className="text-[13px] text-coral-text">{error}</p>}
+        {error && <p className="text-[13px] text-warm">{error}</p>}
 
         <div className="mt-1 flex justify-end gap-2">
           <button

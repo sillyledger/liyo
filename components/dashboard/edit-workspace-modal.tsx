@@ -69,7 +69,7 @@ export function EditWorkspaceModal({ userId, initial, onClose }: EditWorkspaceMo
           The city badge on this card uses your Location from Edit profile — update it there.
         </p>
 
-        {error && <p className="text-[13px] text-coral-text">{error}</p>}
+        {error && <p className="text-[13px] text-warm">{error}</p>}
 
         <div className="mt-1 flex justify-end gap-2">
           <button

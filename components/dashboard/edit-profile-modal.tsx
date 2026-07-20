@@ -131,7 +131,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
               />
             </label>
             <p className="mt-1.5 text-[11.5px] text-muted-2">JPG or PNG, up to 2MB.</p>
-            {avatarError && <p className="mt-1 text-[12.5px] text-coral-text">{avatarError}</p>}
+            {avatarError && <p className="mt-1 text-[12.5px] text-warm">{avatarError}</p>}
           </div>
         </div>
 
@@ -147,7 +147,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <label className={labelClass.replace("mb-1.5 ", "")}>Bio</label>
-            <span className={`text-[11.5px] ${bioNearLimit ? "text-coral-text" : "text-muted-2"}`}>
+            <span className={`text-[11.5px] ${bioNearLimit ? "text-warm" : "text-muted-2"}`}>
               {bio.length}/{MAX_BIO_LENGTH}
             </span>
           </div>
@@ -182,7 +182,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <label className={labelClass.replace("mb-1.5 ", "")}>Quote</label>
-            <span className={`text-[11.5px] ${quoteNearLimit ? "text-coral-text" : "text-muted-2"}`}>
+            <span className={`text-[11.5px] ${quoteNearLimit ? "text-warm" : "text-muted-2"}`}>
               {quote.length}/{MAX_QUOTE_LENGTH}
             </span>
           </div>
@@ -195,7 +195,7 @@ export function EditProfileModal({ userId, initial, onClose }: EditProfileModalP
           />
         </div>
 
-        {error && <p className="text-[13px] text-coral-text">{error}</p>}
+        {error && <p className="text-[13px] text-warm">{error}</p>}
 
         <div className="mt-1 flex justify-end gap-2">
           <button

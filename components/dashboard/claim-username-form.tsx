@@ -107,7 +107,7 @@ export function ClaimUsernameForm({ userId }: { userId: string }) {
         >
           {status === "claiming" ? "Claiming…" : "Claim your shelf"}
         </button>
-        {error && <p className="text-[13px] text-coral-text">{error}</p>}
+        {error && <p className="text-[13px] text-warm">{error}</p>}
       </form>
     </div>
   );
