@@ -37,25 +37,15 @@ export function EditCurrentlyReadingModal({ userId, initial, onClose }: EditCurr
     setItems((prev) => [...prev, { title: "", author: "", cover_url: null }]);
   }
 
-  /** Looked up on blur rather than every keystroke — keeps this to one request per finished edit. */
-  async function lookupCover(index: number) {
-    const item = items[index];
-    if (!item.title.trim()) return;
-
-    try {
-      const params = new URLSearchParams({ title: item.title.trim(), author: item.author.trim() });
-      const res = await fetch(`/api/book-cover?${params}`);
-      if (!res.ok) {
-        console.error(`/api/book-cover returned ${res.status} for "${item.title}"`);
-        return;
-      }
-      const data = await res.json();
-      updateItem(index, { cover_url: data.cover_url ?? null });
-    } catch (err) {
-      // Leave cover_url as-is — the card falls back to a placeholder when it's null.
-      console.error(`Cover lookup failed for "${item.title}"`, err);
-    }
-  }
+  // Open Library cover lookup is temporarily disabled — deferred, not
+  // abandoned. It wasn't reliably returning covers and isn't worth
+  // further debugging right now, so there's no lookup call here anymore
+  // (previously fired on blur of the title/author inputs). Currently
+  // Reading shows a "Coming soon" placeholder for every book instead
+  // (components/currently-reading-card.tsx); title/author still save
+  // and display normally. The lookup logic itself is untouched in
+  // lib/openlibrary.ts and the route (app/api/book-cover/route.ts, now
+  // commented out) if this ever gets revisited.
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,14 +91,12 @@ export function EditCurrentlyReadingModal({ userId, initial, onClose }: EditCurr
                 className={inputClass}
                 value={item.title}
                 onChange={(e) => updateItem(index, { title: e.target.value })}
-                onBlur={() => lookupCover(index)}
                 placeholder="Book title"
               />
               <input
                 className={inputClass}
                 value={item.author}
                 onChange={(e) => updateItem(index, { author: e.target.value })}
-                onBlur={() => lookupCover(index)}
                 placeholder="Author"
               />
               <button
@@ -131,7 +119,7 @@ export function EditCurrentlyReadingModal({ userId, initial, onClose }: EditCurr
         </div>
 
         <p className="text-[12px] text-muted-2">
-          Covers are looked up automatically from the title and author via Open Library — no ISBN needed.
+          Cover art is coming soon — every book shows a placeholder for now.
         </p>
 
         {error && <p className="text-[13px] text-coral-text">{error}</p>}

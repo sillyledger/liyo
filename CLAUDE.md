@@ -378,33 +378,40 @@ assuming the reported line is where the real problem is.
     entry, no track data stored or synced on our side at all.
   - **Currently Reading** is title + author (no ISBN from the user),
     stored as `sections.currently_reading`, same unlimited/3-inline/
-    "View all" pattern as Building etc. Covers use a **two-step Open
-    Library lookup** (`lib/openlibrary.ts`, `findBookCoverUrl`): search
-    `openlibrary.org/search.json?title=&author=` for a matching
-    edition, then build the cover image URL from that edition's
-    `cover_i` (`covers.openlibrary.org/b/id/{cover_id}-M.jpg`). No
-    cover match falls back to a plain coral-toned monogram placeholder
-    (`components/currently-reading-card.tsx`), same visual idea as the
-    avatar/logo monogram fallbacks elsewhere — never a broken image.
-    **This lookup runs through a server route, `app/api/book-cover/
-    route.ts`**, rather than being called directly from the edit
-    modal's client component — Open Library asks integrations to send
-    an identifying `User-Agent` header on regular-use requests, and
-    browsers refuse to let `fetch()` set `User-Agent` from client-side
-    JS, so the request has to be proxied server-side regardless. The
-    modal calls this route on blur of the title/author inputs (not on
-    every keystroke) and stores whatever cover URL comes back on the
-    item itself. `findBookCoverUrl` (`lib/openlibrary.ts`) logs a
-    `console.error` with the actual request URL and response/error on
-    every failure path (non-OK response, no cover in the result, thrown
-    exception) — a silent `return null` there had made a real outage
-    indistinguishable from "this book just has no cover," so any future
-    lookup helper that can fail silently should log the same way.
-    **This general shape — a Route Handler proxying an external API
-    that needs a server-only header or has browser CORS/no-CORS
-    restrictions, not a direct client fetch — is the one to reuse** for
-    any future block that talks to an outside API, not just book-like
-    lookups.
+    "View all" pattern as Building etc. Title/author fully work
+    end-to-end (save, publish, display).
+  - **Book cover art is a known non-working item, intentionally
+    deferred** — not a bug to keep chasing right now. Every book shows
+    a plain "Coming soon" placeholder (`BookCoverPlaceholder` in
+    `components/currently-reading-card.tsx`, coral-gradient box, same
+    palette tokens the old monogram fallback used) regardless of
+    title/author or any stored `cover_url`. The two-step Open Library
+    lookup that used to populate real covers (`lib/openlibrary.ts`,
+    `findBookCoverUrl`: search `openlibrary.org/search.json?title=&
+    author=` for a matching edition, then build the cover image URL
+    from its `cover_i` via `covers.openlibrary.org/b/id/{cover_id}
+    -M.jpg`) wasn't reliably returning covers. Rather than keep
+    debugging it, the call sites are disabled and left commented, not
+    deleted, so it can be revived later:
+    - `app/api/book-cover/route.ts` — the Route Handler that proxied
+      the lookup server-side (Open Library asks integrations to send an
+      identifying `User-Agent` header, which a browser `fetch()` can't
+      set client-side, so this had to be a server route in the first
+      place) is commented out, replaced with a stub `GET` that just
+      returns `{ cover_url: null }` — no network request to Open
+      Library happens.
+    - The `onBlur` lookup call in `edit-currently-reading-modal.tsx`
+      (fired on the title/author inputs) is removed entirely.
+    - `lib/openlibrary.ts` itself (`findBookCoverUrl`, including the
+      `console.error` logging added around each of its failure paths)
+      is untouched and still correct — nothing currently calls it.
+    - **This general shape — a Route Handler proxying an external API
+      that needs a server-only header or has browser CORS/no-CORS
+      restrictions, not a direct client fetch — is still the one to
+      reuse** for any future block that talks to an outside API. If
+      book covers get revisited, start by uncommenting
+      `app/api/book-cover/route.ts` and re-wiring the modal's
+      `onBlur` call.
 
 **In progress / next up:**
 - Dark mode toggle (deferred on purpose — see Design System section

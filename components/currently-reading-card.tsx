@@ -57,21 +57,26 @@ export function CurrentlyReadingCard({ items, colSpanClassName, editButton }: Cu
   );
 }
 
+/**
+ * Open Library cover lookup is temporarily disabled — deferred, not
+ * abandoned. It wasn't reliably returning covers and isn't worth
+ * further debugging right now (see app/api/book-cover/route.ts and
+ * lib/openlibrary.ts, both left intact for a future revival). Every
+ * book shows this placeholder regardless of any stored `cover_url` —
+ * title/author still save and display normally.
+ */
+function BookCoverPlaceholder() {
+  return (
+    <div className="flex h-12 w-9 flex-shrink-0 flex-col items-center justify-center rounded-[4px] border border-line-2 bg-gradient-to-br from-coral to-coral-deep px-0.5 text-center text-[7px] font-medium italic leading-[1.15] text-coral-text">
+      Coming soon
+    </div>
+  );
+}
+
 function BookRow({ item }: { item: CurrentlyReadingItem }) {
   return (
     <div className="flex items-center gap-3">
-      {item.cover_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.cover_url}
-          alt=""
-          className="h-12 w-9 flex-shrink-0 rounded-[4px] border border-line-2 object-cover"
-        />
-      ) : (
-        <div className="flex h-12 w-9 flex-shrink-0 items-center justify-center rounded-[4px] border border-line-2 bg-gradient-to-br from-coral to-coral-deep font-mono text-[11px] text-coral-text">
-          {(item.title || "?").charAt(0).toUpperCase()}
-        </div>
-      )}
+      <BookCoverPlaceholder />
       <div className="min-w-0">
         <p className="truncate text-[13.5px] font-medium text-fg">{item.title}</p>
         {item.author && <p className="truncate text-[11.5px] text-muted-2">{item.author}</p>}

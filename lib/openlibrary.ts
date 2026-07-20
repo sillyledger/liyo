@@ -1,3 +1,7 @@
+// Currently unused — the Currently Reading cover lookup that called this
+// is temporarily disabled (see app/api/book-cover/route.ts, commented
+// out). Left intact, working, for a future revival rather than deleted.
+
 /** Open Library asks integrations to identify themselves on regular-use requests. */
 const OPEN_LIBRARY_USER_AGENT = "Liyo (liyo.dev)";
 
